@@ -14,19 +14,28 @@ This package contains 3 shiny apps:
 
 - Kronos.scRT::Pre_processing()
 
+<p align="center">
 ![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/Pre.png)
+</p>
+
     -   Trims fastq files and maps demultiplexed data 
     -   Creates bins files to be used later on in the analysis
     -   Maps data and calls genomic regions Copy number
     
 - Kronos.scRT::Processing()
 
+<p align="center">
 ![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/Pro.png)
+</p>
+
     - Calculates scReplication Timing profiles and provides an initial overview of the data
 
 - Kronos.scRT::Post_processing()
 
+<p align="center">
 ![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/Post.png)
+</p>
+
     - Provides multiple investigation tools
     
 ### R package analysis workflow
@@ -72,12 +81,15 @@ The diagnostic function can be in interactive mode (a shiny app) or not. In our 
 
     Dagnostic_output = Kronos.scRT::diagnostic(SingleCell$PerCell)
 
+<p align="center">
 ![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/Diagnostic1.png)
+</p>
 
 The second stage of Diagnostic consist in adjusting the S-phase cells ploidy in order to reconstitute a continus S phase if possible.<a href="https://github.com/CL-CHEN-Lab/Kronos_scRT" title="Kronos_scRT">As reference: figure 1b</a>
 
+<p align="center">
 ![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/Diagnostic2.png)
-
+</p>
 The output of the diagnostic function is a list with a Settings data frame and 5 diagnostic plots. We can now proceed with the adjustment of our data using the diagnostic info.
 
 
@@ -119,9 +131,17 @@ The FilterCells function allows removing cells that are too different from the r
     
     FilterS=Kronos.scRT::FilterCells(scCN = SingleCell$SPhase,ApplyFilter = T)
 
-this function returns a vector containing a filtered dataset FilteredData cell-matrix plots before and after filtering
+this function returns a vector containing a filtered dataset FilteredData cell-matrix plots before filtering
 
-![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/BeforeF.png) ![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/AfterF.png)
+<p align="center">
+![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/BeforeF.png)
+</p>
+
+and after filtering
+
+<p align="center">
+![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/AfterF.png)
+</p>
 
     SingleCell$SPhase = FilterS$FilteredData
 
@@ -148,9 +168,10 @@ Correlation plots
       SingleCell$pseudobulk,
       Reference
     ), method = 'spearman')
-
+    
+<p align="center">
 ![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/Corr.png)
-
+</p>
 
 scRT genomic regions plots
 
@@ -161,9 +182,10 @@ scRT genomic regions plots
       Coordinates = list(chr = 'chr1', start = 2800000, end = 12800000) ,
       rasterized_heatmap = T
     )
-
+    
+<p align="center">
 ![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/scRTplot.png)
-
+</p>
 
 Explore Variability based on RT or regions of interest
 
@@ -179,23 +201,26 @@ Explore Variability based on RT or regions of interest
      Twidth = Kronos.scRT::Twidth(Fit_Data)
      
     Kronos.scRT::Twidth_extended_plot(Variability = Var,Fitted_data = Fit_Data,Twidth = Twidth)
-    
+
+<p align="center">
 ![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/TW_extended.png)
-    
+</p>    
 or
 
     Kronos.scRT::Twidth_barplot(Variability = Var,Twidth = Twidth)
 
+<p align="center">
 ![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/TW.png)
-
+</p>
 Visualize variability as Bin probability of Replication
 
     BinProb=Kronos.scRT::Prepare_S_phase_cells_forBinRepProb(S = SingleCell$SPhase,RT = SingleCell$pseudobulk)
 
     Kronos.scRT::BinRepProbPlot(Variability = BinProb)
 
+<p align="center">
 ![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/BinProb.png)
-
+</p>
 
 ### Authors
 
