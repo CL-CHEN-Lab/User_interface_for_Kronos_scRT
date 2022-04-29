@@ -1,0 +1,27 @@
+/* body */
+.content-wrapper, .right-side {
+background-color: #ffffff;
+overflow-x: scroll;
+overflow-y: scroll;
+}
+
+/* box */
+.box.box-solid.box-primary>.box-header {
+  background:#304044
+}
+
+.box.box-solid.box-primary{
+  border-bottom-color:#304044;
+  border-left-color:#304044;
+  border-right-color:#304044;
+  border-top-color:#304044;
+  overflow-x: scroll;
+  overflow-y: scroll;
+}
+
+/* rows */
+
+.row{
+  padding:15px;
+}
+
