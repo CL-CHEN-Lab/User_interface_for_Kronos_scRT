@@ -26,6 +26,12 @@ GenomeBinning <-
     `%do%` = foreach::`%do%`
     `%>%` = tidyr::`%>%`
 
+    #filter
+    if(!is.null(Chr_filter)){
+      Chr_size=Chr_size%>%
+        dplyr::filter(chr %in% Chr_filter)
+    }
+
 
     #parallelise
     cl <- snow::makeCluster(Cores)
@@ -46,13 +52,7 @@ GenomeBinning <-
                            end = bins)
       bins
     }
-    #filter out bins
     bins = bins %>%
-      dplyr::mutate(chr = factor(chr,
-                                 levels = ifelse(
-                                   is.null(Chr_filter), sort(unique(Chr_size$chr)), Chr_filter
-                                 ))) %>%
-      tidyr::drop_na() %>%
       #convert bins into granges
       GenomicRanges::makeGRangesFromDataFrame(
         seqnames.field  = 'chr',
@@ -90,17 +90,36 @@ AdjustPerCell <-
     PerCell = PerCell %>%
       dplyr::inner_join(Settings, by = c('basename', 'group')) %>%
       #filter out cells that won't be used
-      dplyr::filter(coverage_per_1Mbp >= RPM_TH) %>%
-      #convert basename and group to factors
+      dplyr::filter(coverage_per_1Mbp >= RPM_TH)
+
+    #convert basename and group to factors
+
+    if(is.null(Basename_leves)){
+      PerCell = PerCell %>%
+        dplyr::mutate(
+          basename = factor(basename,
+                            levels = sort(unique(basename))))
+    }else{
+      PerCell = PerCell %>%
+        dplyr::mutate(
+          basename = factor(basename,
+                            levels = Basename_leves))
+    }
+
+    if(is.null(Group_leves)){
+      PerCell = PerCell %>%
+        dplyr::mutate(
+          group = factor(group,
+                            levels = sort(unique(group))))
+    }else{
+      PerCell = PerCell %>%
+        dplyr::mutate(
+          group = factor(group,
+                            levels = Group_leves))
+    }
+
+    PerCell = PerCell %>%
       dplyr::mutate(
-        basename = factor(basename,
-                          levels = ifelse(
-                            is.null(Basename_leves), sort(unique(basename)), Basename_leves
-                          )),
-        group = factor(group,
-                       levels = ifelse(
-                         is.null(Group_leves), sort(unique(group)), Group_leves
-                       )),
         #use setting file to change is_noisy and is_high_dimap
         is_noisy = as.logical(is_noisy),
         is_high_dimapd = ifelse(
@@ -177,23 +196,42 @@ AdjustCN <-
            Chr_filter = NULL) {
     #load required operators
     `%>%` = tidyr::`%>%`
+    #assign levels
+    if(is.null(Basename_leves)){
+      scCN = scCN %>%
+        dplyr::mutate(
+          basename = factor(basename,
+                            levels = sort(unique(basename))))
+    }else{
+      scCN = scCN %>%
+        dplyr::mutate(
+          basename = factor(basename,
+                            levels = Basename_leves))
+    }
+    if(is.null(Group_leves)){
+      scCN = scCN %>%
+        dplyr::mutate(
+          group = factor(group,
+                         levels = sort(unique(group))))
+    }else{
+      scCN = scCN %>%
+        dplyr::mutate(
+          group = factor(group,
+                         levels = Group_leves))
+    }
+    if(is.null(Chr_filter)){
+      scCN = scCN %>%
+        dplyr::mutate(
+          chr = factor(chr,
+                         levels = sort(unique(chr))))
+    }else{
+      scCN = scCN %>%
+        dplyr::mutate(
+          chr = factor(chr,
+                         levels = Chr_filter))
+    }
 
     scCN = scCN %>%
-      #convert basename, group and chr to factors, this will convert not used chrs into NA
-      dplyr::mutate(
-        basename = factor(basename,
-                          levels = ifelse(
-                            is.null(Basename_leves), sort(unique(basename)), Basename_leves
-                          )),
-        group = factor(group,
-                       levels = ifelse(
-                         is.null(Group_leves), sort(unique(group)), Group_leves
-                       )),
-        chr = factor(
-          x =  chr,
-          levels = ifelse(is.null(Chr_filter), sort(unique(chr)), Chr_filter)
-        )
-      ) %>%
       #drop na
       tidyr::drop_na() %>%
       #join with Cell and basename colums from Per cell to filter cells to use
@@ -296,15 +334,10 @@ Rebin <- function(PerCell, scCN, Bins, Sphase = NULL) {
       start,
       end,
       CN,
-      background,
-      CN_bg,
-      th,
-      Rep,
-      PercentageReplication,
       Cell,
       basename,
       group,
-      newIndex
+      index
     )
 
   return(scCN)
@@ -368,12 +401,26 @@ RebinRT <-
                                                         w =
                                                           width,
                                                         na.rm = T)) %>%
-      dplyr::ungroup() %>%
-      dplyr::mutate(chr = factor(
-        x =  chr,
-        levels = ifelse(is.null(Chr_filter), sort(unique(chr)), Chr_filter)
-      ),
-      RT = (RT - min(RT)) / (max(RT) - min(RT))) %>%
+      dplyr::ungroup()
+
+
+
+#Assign level
+    if(is.null(Chr_filter)){
+      RT = RT %>%
+        dplyr::mutate(
+          chr = factor(chr,
+                         levels = sort(unique(chr))))
+    }else{
+      RT = RT %>%
+        dplyr::mutate(
+          chr = factor(chr,
+                         levels = Chr_filter))
+    }
+
+
+    RT = RT%>%
+      dplyr::mutate(RT = (RT - min(RT)) / (max(RT) - min(RT))) %>%
       dplyr::ungroup() %>%
       tidyr::drop_na()
 
@@ -436,13 +483,25 @@ Replication_state = function(Samples,
   doSNOW::registerDoSNOW(cl)
   on.exit(snow::stopCluster(cl))
 
+  #assigne factors
+  if(is.null(Chr_filter)){
+    Samples = Samples %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(chr = factor(
+        x =  chr,
+        levels =  sort(unique(chr))
+      ))
+  }else{
+    Samples = Samples %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(chr = factor(
+        x =  chr,
+        levels =  Chr_filter
+      ))
+  }
+
   #merge signal and bg and calculate their ratio
   Samples = Samples %>%
-    dplyr::ungroup() %>%
-    dplyr::mutate(chr = factor(
-      x =  chr,
-      levels = ifelse(is.null(Chr_filter), sort(unique(chr)), Chr_filter)
-    )) %>%
     dplyr::inner_join(background,
                       by = c("chr", "start", "end", "basename", 'group')) %>%
     dplyr::mutate(CN_bg = log2(CN / background)) %>%
@@ -725,7 +784,7 @@ pseudoBulkRT <- function(S_scCN) {
 
   RT_binning = foreach::foreach(Group = unique(rep_percentage$group),
                                 .combine = 'rbind') %:%
-    foreach::foreach(bins = 1:10, .combine = 'rbind') %do% {
+    foreach::foreach(bins = 1:30, .combine = 'rbind') %do% {
       rep_group = rep_percentage %>%
         dplyr::ungroup() %>%
         dplyr::filter(group == Group) %>%

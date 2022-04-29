@@ -69,9 +69,9 @@ diagnostic = function(PerCell,
                             plotOutput('plot__diagnostic')),
               shiny::column(
                 width = 6,
-                plotOutput('plot2__diagnostic'),
+                plotOutput('plot2__diagnostic',
                 brush = shiny::brushOpts(id = "plot2_brush__diagnostic",
-                                         direction = 'y')
+                                         direction = 'y'))
               )
             ),
             shiny::fluidRow(

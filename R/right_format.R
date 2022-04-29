@@ -21,7 +21,7 @@ right_format = Vectorize(function(file_path,
                                   columns_to_check,
                                   delim = '\t',
                                   skip = 0,
-                                  wrong_message = 'does not have the proper format',
+                                  wrong_message = 'does not have the proper format \n',
                                   rigth_message = '',
                                   logical = F) {
   # if columns_to_check is numeric check the number of colums
@@ -37,7 +37,7 @@ right_format = Vectorize(function(file_path,
       error = function(x)
         dplyr::tibble()
     )) != columns_to_check) {
-      return(ifelse(logical, F, paste(wrong_message, '\n')))
+      return(ifelse(logical, F, wrong_message))
     } else{
       return(ifelse(logical, T, rigth_message))
     }
@@ -56,7 +56,7 @@ right_format = Vectorize(function(file_path,
       error = function(x)
         dplyr::tibble()
     )))) {
-      return(ifelse(logical, F, paste(wrong_message, '\n')))
+      return(ifelse(logical, F, wrong_message))
     } else{
       return(ifelse(logical, T, rigth_message))
     }
