@@ -13,17 +13,17 @@ and then Kronos.scRT
 This package contains 3 shiny apps:
 
 - Kronos.scRT::Pre_processing()
-![](https://github.com/Derfen3001/Kronos.scRT/blob/master/img/Pre.png)
+![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/Pre.png)
     -   Trims fastq files and maps demultiplexed data 
     -   Creates bins files to be used later on in the analysis
     -   Maps data and calls genomic regions Copy number
     
 - Kronos.scRT::Processing()
-![](https://github.com/Derfen3001/Kronos.scRT/blob/master/img/Pro.png)
+![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/Pro.png)
     - Calculates scReplication Timing profiles and provides an initial overview of the data
 
 - Kronos.scRT::Post_processing()
-![](https://github.com/Derfen3001/Kronos.scRT/blob/master/img/Post.png)
+![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/Post.png)
     - Provides multiple investigation tools
     
 ### R package analysis workflow
@@ -48,8 +48,8 @@ Once data have been mapped we bin our reference genome and calculate mappability
     )
     
 The next step consists in calling the CN
-Chromsize = readr::read_tsv(url('http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/mm10.chrom.sizes'), col_names = c('chr', 'size'))
 
+    Chromsize = readr::read_tsv(url('http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/mm10.chrom.sizes'), col_names = c('chr', 'size'))
 
     SingleCell = Kronos.scRT::CallCNV(
       directory = '~/outputDirectory/BAM/',
@@ -67,13 +67,13 @@ The data you downloaded come with metadata attached, therefore we can provide to
     
 The diagnostic function can be in interactive mode (a shiny app) or not. In our specific case, after running the shiny app we want to select the manual option and proceed. For unsorted single-cell samples, it is possible to proceed with the automatic option that will be used to estimate S-phase cells. If Staging information is not available the user will have to use the Variability vs Ploidy plot to select a variability threshold to identify the S-phase.  <a href="https://github.com/CL-CHEN-Lab/Kronos_scRT" title="Kronos_scRT">As reference: figure 1a</a>
 
-Dagnostic_output = Kronos.scRT::diagnostic(SingleCell$PerCell)
+    Dagnostic_output = Kronos.scRT::diagnostic(SingleCell$PerCell)
 
-![](https://github.com/Derfen3001/Kronos.scRT/blob/master/img/Diagnostic1.png)
+![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/Diagnostic1.png)
 
 The second stage of Diagnostic consist in adjusting the S-phase cells ploidy in order to reconstitute a continus S phase if possible.<a href="https://github.com/CL-CHEN-Lab/Kronos_scRT" title="Kronos_scRT">As reference: figure 1b</a>
 
-![](https://github.com/Derfen3001/Kronos.scRT/blob/master/img/Diagnostic2.png)
+![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/Diagnostic2.png)
 
 The output of the diagnostic function is a list with a Settings data frame and 5 diagnostic plots. We can now proceed with the adjustment of our data using the diagnostic info.
 
@@ -118,9 +118,7 @@ The FilterCells function allows removing cells that are too different from the r
 
 this function returns a vector containing a filtered dataset FilteredData cell-matrix plots before and after filtering
 
-![](https://github.com/Derfen3001/Kronos.scRT/blob/master/img/BeforeF.png) ![](https://github.com/Derfen3001/Kronos.scRT/blob/master/img/AfterF.png)
-
-
+![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/BeforeF.png) ![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/AfterF.png)
 
     SingleCell$SPhase = FilterS$FilteredData
 
@@ -173,13 +171,13 @@ we can now explore the data using various investigation plots such as:
      
     Kronos.scRT::Twidth_extended_plot(Variability = Var,Fitted_data = Fit_Data,Twidth = Twidth)
     
-![](https://github.com/Derfen3001/Kronos.scRT/blob/master/img/TW_extended.png)
+![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/TW_extended.png)
     
 or
 
     Kronos.scRT::Twidth_barplot(Variability = Var,Twidth = Twidth)
 
-![](https://github.com/Derfen3001/Kronos.scRT/blob/master/img/TW.png)
+![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/TW.png)
 
 - Visualize variability as Bin probability of Replication
 
@@ -187,7 +185,7 @@ or
 
     Kronos.scRT::BinRepProbPlot(Variability = BinProb)
 
-![](https://github.com/Derfen3001/Kronos.scRT/blob/master/img/BinProb.png)
+![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/BinProb.png)
 
 
 ### Authors
