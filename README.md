@@ -13,16 +13,19 @@ and then Kronos.scRT
 This package contains 3 shiny apps:
 
 - Kronos.scRT::Pre_processing()
+
 ![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/Pre.png)
     -   Trims fastq files and maps demultiplexed data 
     -   Creates bins files to be used later on in the analysis
     -   Maps data and calls genomic regions Copy number
     
 - Kronos.scRT::Processing()
+
 ![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/Pro.png)
     - Calculates scReplication Timing profiles and provides an initial overview of the data
 
 - Kronos.scRT::Post_processing()
+
 ![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/Post.png)
     - Provides multiple investigation tools
     
@@ -138,15 +141,18 @@ as well as reformat an ESC mm10 bulk RT bedgraph to use as a control
     )
 
 we can now explore the data using various investigation plots such as:
-- correlation plots
+
+Correlation plots
     
     Kronos.scRT::KCorr_plot(df = rbind(
       SingleCell$pseudobulk,
       Reference
     ), method = 'spearman')
 
+![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/Corr.png)
 
-- scRT genomic regions plots
+
+scRT genomic regions plots
 
     Kronos.scRT::scRTplot(
       pseudoBulkRT = rbind(SingleCell$pseudobulk,
@@ -156,7 +162,10 @@ we can now explore the data using various investigation plots such as:
       rasterized_heatmap = T
     )
 
-- Explore Variability based on RT or regions of interest
+![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/scRTplot.png)
+
+
+Explore Variability based on RT or regions of interest
 
     Var=Kronos.scRT::Variability(S_scCN=SingleCell$SPhase,scRT=SingleCell$pseudobulk)
     
@@ -179,7 +188,7 @@ or
 
 ![](https://github.com/Derfen3001/Kronos.scRT/blob/main/img/TW.png)
 
-- Visualize variability as Bin probability of Replication
+Visualize variability as Bin probability of Replication
 
     BinProb=Kronos.scRT::Prepare_S_phase_cells_forBinRepProb(S = SingleCell$SPhase,RT = SingleCell$pseudobulk)
 
