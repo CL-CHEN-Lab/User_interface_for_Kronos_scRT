@@ -207,4 +207,4 @@ Visualize variability as Bin probability of Replication
 
 Please contact the authors for any further questions:
 
-[Stefano Gnan](mailto:stefano.gnan@curie.fr)and [Chunlong Chen](mailto:chunlong.chen@curie.fr) (Institut Curie)
+[Stefano Gnan](mailto:stefano.gnan@curie.fr) and [Chunlong Chen](mailto:chunlong.chen@curie.fr) (Institut Curie)
