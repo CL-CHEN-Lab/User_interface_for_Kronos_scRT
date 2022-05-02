@@ -129,7 +129,7 @@ The FilterCells function allows removing cells that are too different from the r
 
 this function returns a vector containing a filtered dataset FilteredData and a cell-matrix plots before and after filtering
 
-<img style="text-align: center;" src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/BeforeF.png" alt="Correlation Matrix before filter"> <img style="text-align: center;" src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/AfterF.png" alt="Correlation Matrix before filter">
+<img style="text-align: center;" src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/BeforeF.png" alt="Correlation Matrix before filter" width="400"> <img style="text-align: center;" src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/AfterF.png" alt="Correlation Matrix before filter" width="400">
 
 if needed we can overite the Sphase data with the filtered ones.
 
@@ -286,16 +286,16 @@ Calculate correlation between Bulk and Pseudobulk
       Reference
     ), method = 'spearman')
     
-<img style="text-align: center;" src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/MCF7_Corr.png" alt="Correlation Matrix">
+<img style="text-align: center;" src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/MCF7_Corr.png" alt="Correlation Matrix" width="400">
 
 and explore genomic regions using the following command
 
     Kronos.scRT::scRTplot(
-  pseudoBulkRT = rbind(SingleCell$pseudobulk,
-                       Reference),
-  S_scCN = SingleCell$SPhase,
-  Coordinates = list(chr = 'chr1', start = 40000000, end = 100000000) ,
-  rasterized_heatmap = T)
+      pseudoBulkRT = rbind(SingleCell$pseudobulk,
+                           Reference),
+      S_scCN = SingleCell$SPhase,
+      Coordinates = list(chr = 'chr1', start = 40000000, end = 100000000) ,
+      rasterized_heatmap = T)
 
 <img style="text-align: center;" src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/MCF7_scPlot.png" alt="ScPlots">
 
@@ -311,8 +311,20 @@ This dataset allows to explore variability at a much higher resolution compared 
     
     Kronos.scRT::Twidth_extended_plot(Variability = Var,Fitted_data = Fit_Data,Twidth = Twidth)
 
+<img style="text-align: center;" src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/TW_ext.png" alt="Correlation Matrix">
 
-Kronos.scRT::Twidth_barplot(Variability = Var,Twidth = Twidth)
+    Kronos.scRT::Twidth_barplot(Variability = Var,Twidth = Twidth)
+
+<img style="text-align: center;" src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/TW_MCF7.png" alt="Correlation Matrix">
+
+Another way to visualise RT variability is the bin probability of being replicated in function of its average replication timing in different portions of the S phase.
+
+    BinProbS=Kronos.scRT::Prepare_S_phase_cells_forBinRepProb(S = SingleCell$SPhase,RT = SingleCell$pseudobulk)
+    BinProbG=Kronos.scRT::Prepare_G1G2_phase_cells_forBinRepProb(G1.G2 = SingleCell$G1G2,RT = SingleCell$pseudobulk)
+    
+    Kronos.scRT::BinRepProbPlot(Variability = rbind(BinProbS,BinProbG))
+
+<img style="text-align: center;" src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/TW_MCF7.png" alt="Correlation Matrix">
 
 ### Authors
 
