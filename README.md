@@ -13,23 +13,23 @@ and then Kronos.scRT
 This package contains 3 shiny apps:
 
 - Kronos.scRT::Pre_processing()
-<center>
+ <p align="center">
 <img src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/Pre.png">
-</center>
+</p>
     -   Trims fastq files and maps demultiplexed data 
     -   Creates bins files to be used later on in the analysis
     -   Maps data and calls genomic regions Copy number
     
 - Kronos.scRT::Processing()
-<center>
+ <p align="center">
 <img src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/Pro.png">
-</center>
+</p>
     - Calculates scReplication Timing profiles and provides an initial overview of the data
 
 - Kronos.scRT::Post_processing()
-<center>
+ <p align="center">
 <img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/Post.png">
-</center>
+</p>
     - Provides multiple investigation tools
     
 ### R package analysis workflow
@@ -79,13 +79,13 @@ The data you downloaded come with metadata attached, therefore we can provide to
 The diagnostic function can be in interactive mode (a shiny app) or not. In our specific case, after running the shiny app we want to select the manual option and proceed. For unsorted single-cell samples, it is possible to proceed with the automatic option that will be used to estimate S-phase cells. If Staging information is not available the user will have to use the Variability vs Ploidy plot to select a variability threshold to identify the S-phase.  <a href="https://github.com/CL-CHEN-Lab/Kronos_scRT" title="Kronos_scRT">As reference: figure 1a</a>
 
     Dagnostic_output = Kronos.scRT::diagnostic(SingleCell$PerCell)
-<center>
+ <p align="center">
 <img src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/Diagnostic1.png">
-</center>
+</p>
 The second stage of Diagnostic consist in adjusting the S-phase cells ploidy in order to reconstitute a continus S phase if possible.<a href="https://github.com/CL-CHEN-Lab/Kronos_scRT" title="Kronos_scRT">As reference: figure 1b</a>
-<center>
+ <p align="center">
 <img src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/Diagnostic2.png">
-</center>
+</p>
 The output of the diagnostic function is a list with a Settings data frame and 5 diagnostic plots. We can now proceed with the adjustment of our data using the diagnostic info.
 
 
@@ -128,9 +128,9 @@ The FilterCells function allows removing cells that are too different from the r
     FilterS=Kronos.scRT::FilterCells(scCN = SingleCell$SPhase,ApplyFilter = T)
 
 this function returns a vector containing a filtered dataset FilteredData and a cell-matrix plots before and after filtering
-<center>
+ <p align="center">
 <img src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/BeforeF.png" alt="Correlation Matrix before filter" width="400"> <img src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/AfterF.png" alt="Correlation Matrix before filter" width="400">
-</center>
+</p>
 if needed we can overite the Sphase data with the filtered ones.
 
     SingleCell$SPhase = FilterS$FilteredData
@@ -158,9 +158,9 @@ Correlation plots
       SingleCell$pseudobulk,
       Reference
     ), method = 'spearman')
-<center>    
+ <p align="center">    
 <img src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/Corr.png" width="400">
-</center>
+</p>
 scRT genomic regions plots
 
     Kronos.scRT::scRTplot(
@@ -170,9 +170,9 @@ scRT genomic regions plots
       Coordinates = list(chr = 'chr1', start = 2800000, end = 12800000) ,
       rasterized_heatmap = T
     )
-<center>    
+ <p align="center">    
 <img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/scRTplot.png">
-</center>
+</p>
 Explore Variability based on RT or regions of interest
 
     Var=Kronos.scRT::Variability(S_scCN=SingleCell$SPhase,scRT=SingleCell$pseudobulk)
@@ -187,9 +187,9 @@ Explore Variability based on RT or regions of interest
      Twidth = Kronos.scRT::Twidth(Fit_Data)
      
      Kronos.scRT::Twidth_barplot(Variability = Var,Twidth = Twidth)
-<center>
+ <p align="center">
 <img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/TW.png" width="400">
-</center>
+</p>
 #### Tutorial 2
 
 To give a more comprhesive idea of Kronos scRT potential a bigger dataset form <a href="https://www.nature.com/articles/s41467-022-30043-x" title="(Gnan et al. 2022)">(Gnan et al. 2022) </a> is provided with this package.
@@ -199,13 +199,13 @@ To give a more comprhesive idea of Kronos scRT potential a bigger dataset form <
 Using the diagnostic function we can dived S-phase cells from G1/G2 cells selecting a buffer reagin between the low variability G1/G2-phase cells and the two arms made of high variability S-phase cells.
 
     Dagnostic_output = Kronos.scRT::diagnostic(SingleCell$PerCell)
-<center>
+ <p align="center">
 <img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/MCF7_Diagnostic1.png">
-</center>
+</p>
 Since the cells of this dataset span through most of the S phase, we can use the automatic option of Kronos scRT to fix the S-phase progression.
-<center>
+ <p align="center">
 <img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/MCF7_Diagnostic2.png">
-</center>
+</p>
 We use the parameters estimated with the diagnostic function to correct our data as before
 
 
@@ -259,9 +259,9 @@ Remember always to check if there are cells that have to be excluded ( this can 
     FilterS=Kronos.scRT::FilterCells(scCN = SingleCell$SPhase,ApplyFilter = T,min_cor = 0.3)
     FilterG=Kronos.scRT::FilterCells(scCN = SingleCell$G1G2,ApplyFilter = T,min_cor = 0.3)
 
-<center>
+ <p align="center">
 <img src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/FilterMCF7.png" alt="Correlation Matrix">
-</center>
+</p>
 Filters can be applied as followed
 
     SingleCell$SPhase = FilterS$FilteredData
@@ -285,9 +285,9 @@ Calculate correlation between Bulk and Pseudobulk
       SingleCell$pseudobulk,
       Reference
     ), method = 'spearman')
-<center>   
+ <p align="center">   
 <img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/MCF7_Corr.png" alt="Correlation Matrix" width="400">
-</center>
+</p>
 and explore genomic regions using the following command
 
     Kronos.scRT::scRTplot(
@@ -296,9 +296,9 @@ and explore genomic regions using the following command
       S_scCN = SingleCell$SPhase,
       Coordinates = list(chr = 'chr1', start = 40000000, end = 100000000) ,
       rasterized_heatmap = T)
-<center>
+ <p align="center">
 <img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/MCF7_scPlot.png" alt="ScPlots">
-</center>
+</p>
 This dataset allows to explore variability at a much higher resolution compared to the one before we can therfore up to 5 RT categoris to calculate the TW.
 
     Var=Kronos.scRT::Variability(S_scCN=SingleCell$SPhase,scRT=SingleCell$pseudobulk)
@@ -310,22 +310,26 @@ This dataset allows to explore variability at a much higher resolution compared 
     Twidth = Kronos.scRT::Twidth(Fit_Data)
     
     Kronos.scRT::Twidth_extended_plot(Variability = Var,Fitted_data = Fit_Data,Twidth = Twidth)
-<center>
+ <p align="center">
 <img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/TW_ext.png" alt="Correlation Matrix">
-</center>
+</p>
+
     Kronos.scRT::Twidth_barplot(Variability = Var,Twidth = Twidth)
-<center>
+
+ <p align="center">
 <img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/TW_MCF7.png" >
-</center>
+</p>
+
 Another way to visualise RT variability is the bin probability of being replicated in function of its average replication timing in different portions of the S phase.
 
     BinProbS=Kronos.scRT::Prepare_S_phase_cells_forBinRepProb(S = SingleCell$SPhase,RT = SingleCell$pseudobulk)
     BinProbG=Kronos.scRT::Prepare_G1G2_phase_cells_forBinRepProb(G1.G2 = SingleCell$G1G2,RT = SingleCell$pseudobulk)
     
     Kronos.scRT::BinRepProbPlot(Variability = rbind(BinProbS,BinProbG))
-<center>
+
+<p align="center">
 <img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/BinProb.png">
-</center>
+</p>
 ### Authors
 
 Please contact the authors for any further questions:
