@@ -267,13 +267,14 @@ scCNplot = function(S_scCN,
       )
   }
 
-  plot = plot + ggplot2::facet_grid(phase ~ chr, scales = 'free_y', space =  'free_y') +
+  plot = plot + ggplot2::facet_grid(phase ~ chr, scales = 'free', space =  'free') +
     ggplot2::scale_x_continuous(
       labels = function(x)
         paste(x / 10 ^ 6, 'Mb', sep = ' ')
     ) + ggplot2::theme(
       legend.position = 'right',
       legend.direction = "vertical",
+      axis.title.y = ggplot2::element_blank(),
       axis.text.y = ggplot2::element_blank(),
       axis.ticks.y = ggplot2::element_blank(),
       axis.text.x = ggplot2::element_text(

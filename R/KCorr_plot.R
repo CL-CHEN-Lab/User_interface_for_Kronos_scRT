@@ -6,7 +6,7 @@
 #' @importFrom  tidyr %>% drop_na spread
 #' @importFrom  ggplot2 aes annotate coord_cartesian element_blank element_text geom_density geom_hex geom_polygon ggplot scale_fill_gradient2 scale_fill_gradientn scale_x_continuous scale_y_continuous theme theme_bw theme_set
 #' @importFrom stringr str_to_title
-#' @importFrom GGally ggpairs
+#' @import GGally
 #'
 #' @param df, a dataframe containing bulk and pseudo-bulk RTs and the following columns:chr, start, end, group, basename, RT
 #'
