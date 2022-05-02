@@ -159,7 +159,7 @@ Correlation plots
       Reference
     ), method = 'spearman')
     
-<img style="text-align: center;" src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/Corr.png">
+<img style="text-align: center;" src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/Corr.png" width="400">
 
 scRT genomic regions plots
 
@@ -188,7 +188,7 @@ Explore Variability based on RT or regions of interest
      
      Kronos.scRT::Twidth_barplot(Variability = Var,Twidth = Twidth)
 
-<img style="text-align: center;" src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/TW.png">
+<img style="text-align: center;" src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/TW.png" width="400">
 
 #### Tutorial 2
 
@@ -315,7 +315,7 @@ This dataset allows to explore variability at a much higher resolution compared 
 
     Kronos.scRT::Twidth_barplot(Variability = Var,Twidth = Twidth)
 
-<img style="text-align: center;" src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/TW_MCF7.png" alt="Correlation Matrix">
+<img style="text-align: center;" src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/TW_MCF7.png" >
 
 Another way to visualise RT variability is the bin probability of being replicated in function of its average replication timing in different portions of the S phase.
 
@@ -324,7 +324,7 @@ Another way to visualise RT variability is the bin probability of being replicat
     
     Kronos.scRT::BinRepProbPlot(Variability = rbind(BinProbS,BinProbG))
 
-<img style="text-align: center;" src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/TW_MCF7.png" alt="Correlation Matrix">
+<img style="text-align: center;" src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/BinProb.png">
 
 ### Authors
 
