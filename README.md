@@ -194,7 +194,7 @@ Explore Variability based on RT or regions of interest
 
 To give a more comprhesive idea of Kronos scRT potential a bigger dataset form <a href="https://www.nature.com/articles/s41467-022-30043-x" title="(Gnan et al. 2022)">(Gnan et al. 2022) </a> is provided with this package.
 
-    SingleCell=Kronos.scRT::MCF7_subpo1
+    SingleCell=Kronos.scRT::MCF7_subpop1
 
 Using the diagnostic function we can dived S-phase cells from G1/G2 cells selecting a buffer reagin between the low variability G1/G2-phase cells and the two arms made of high variability S-phase cells.
 
