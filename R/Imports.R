@@ -12,7 +12,7 @@
 #'
 #' @importFrom sp point.in.polygon
 #'
-#' @importFrom shinydashboard box dashboardBody dashboardHeader dashboardPage dashboardSidebar menuItem sidebarMenu tabItem tabItems menuSubItem updateTabItems tabBox
+#' @importFrom shinydashboard box dashboardBody dashboardHeader dashboardPage dashboardSidebar menuItem sidebarMenu tabItem tabItems menuSubItem updateTabItems tabBox updateTabItems
 #'
 #' @importFrom shinyFiles getVolumes parseDirPath parseFilePaths shinyDirButton shinyDirChoose shinyFileChoose shinyFilesButton
 #'

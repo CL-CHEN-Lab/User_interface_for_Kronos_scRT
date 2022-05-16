@@ -1,7 +1,7 @@
 #load operators
 `%>%` = tidyr::`%>%`
-`%dopar%`=foreach::`%dopar%`
-`%do%`=foreach::`%do%`
+`%dopar%` = foreach::`%dopar%`
+`%do%` = foreach::`%do%`
 
 #set theme for plots
 ggplot2::theme_set(new = ggplot2::theme_bw())
@@ -95,7 +95,7 @@ ui <- shinydashboard::dashboardPage(
               width = '100%',
               inputId = 'cores',
               label = '',
-              value = trunc(maxCores/2),
+              value = trunc(maxCores / 2),
               min = 1,
               max = maxCores,
               step = 1,
@@ -119,7 +119,11 @@ ui <- shinydashboard::dashboardPage(
           shinydashboard::box(
             width = 4,
             height = '150',
-            title = 'Chr prefix to use',
+            title = shiny::div(
+              'Chr prefix to use',
+              bsplus::shiny_iconlink() %>%
+                bsplus::bs_embed_popover(title = 'Depending on your reference genome, chromosomes or scaffolds could be named differntly. Please, privide the prefix that preceeds the chromosome or scaffold number. If no prefix is present this box has to be emptied.' , placement = 'right')
+            ),
             solidHeader = T,
             background = 'black',
             shiny::textInput(
@@ -137,21 +141,27 @@ ui <- shinydashboard::dashboardPage(
           shinydashboard::box(
             width = 4,
             height = '150',
-            title = 'Chr to include',
+            title = shiny::div(
+              'Chr to include',
+              bsplus::shiny_iconlink() %>%
+                bsplus::bs_embed_popover(title = 'Chromosome to include in the analysis. You can define ranges using ":" and individual chromosomes using ",". Don\'t include the chr prefix!' , placement = 'right')
+            ),
             solidHeader = T,
             background = 'black',
             shiny::textInput(
               inputId = 'chr_range',
               label = '',
               value = '1:22'
-            ),
-            bsplus::shiny_iconlink() %>%
-              bsplus::bs_embed_popover(title = 'Chromosome to include in the analysis. You can define ranges using ":" and individual chromosomes using ",". Don\'t include the chr prefix!' , placement = 'right')
+            )
           ),
           shinydashboard::box(
             width = 4,
             height = '150',
-            title = 'Chr size file',
+            title = shiny::div(
+              'Chr size file',
+              bsplus::shiny_iconlink() %>%
+                bsplus::bs_embed_popover(title = 'For most genome assemblies this file can be downloaded from UCSC Genome Browser website.' , placement = 'right')
+            ),
             solidHeader = T,
             background = 'black',
             align = 'center',
@@ -211,7 +221,10 @@ ui <- shinydashboard::dashboardPage(
                 width = 3,
                 shinyFiles::shinyFilesButton(
                   id = 'PerCell_file',
-                  label = 'PerCell file',
+                  label = shiny::div('PerCell file',
+                                     bsplus::shiny_iconlink() %>%
+                                       bsplus::bs_embed_popover(title = '_PerCell.csv file created by Kronos scRT processing.' , placement = 'right')
+                  ),
                   title = 'PerCell File',
                   multiple = F,
                   style = "width: 100%"
@@ -226,7 +239,10 @@ ui <- shinydashboard::dashboardPage(
                 width = 3,
                 shinyFiles::shinyFilesButton(
                   id = 'scCN',
-                  label = 'sc tracks file',
+                  label = shiny::div('sc tracks file',
+                                     bsplus::shiny_iconlink() %>%
+                                       bsplus::bs_embed_popover(title = '_scCNV.tsv file created by Kronos scRT processing.' , placement = 'right')
+                  ),
                   title = 'sc tracks file',
                   multiple = F,
                   style = "width: 100%"
@@ -241,7 +257,11 @@ ui <- shinydashboard::dashboardPage(
                 width = 3,
                 shinyFiles::shinyFilesButton(
                   id = 'setting_file',
-                  label = "Setting file",
+                  label = shiny::div(
+                    'Setting file',
+                    bsplus::shiny_iconlink() %>%
+                      bsplus::bs_embed_popover(title = 'Optinal. If this dataset has been used in a previous analysis the produced setting file can be reused.' , placement = 'right')
+                  ),
                   title =  "Setting file",
                   multiple = F,
                   style = "width: 100%"
@@ -256,7 +276,11 @@ ui <- shinydashboard::dashboardPage(
                 width = 3,
                 shinyFiles::shinyFilesButton(
                   id = 'whoiswho_file',
-                  label = "Who's who file",
+                  label = shiny::div(
+                    "Who's who file",
+                    bsplus::shiny_iconlink() %>%
+                      bsplus::bs_embed_popover(title = 'Optinal. A file containing experimental cell staging information. Such a file has to containin cell identifiers under the colums Cell and logical values under the colums S_Phase. (TRUE = a cell is in S phase, FALSE = a cell is in G1 or G2 phase)' , placement = 'right')
+                  ),
                   title =  "Who's who file",
                   multiple = F,
                   style = "width: 100%"
@@ -271,7 +295,11 @@ ui <- shinydashboard::dashboardPage(
                 shiny::textInput(
                   inputId = ('FileName'),
                   value =  'Exp',
-                  label = 'Basename',
+                  label = shiny::div(
+                    "Basename",
+                    bsplus::shiny_iconlink() %>%
+                      bsplus::bs_embed_popover(title = 'This Name identifies each individual experiment' , placement = 'right')
+                  ),
                   width = '100%'
                 )
               ),
@@ -280,7 +308,11 @@ ui <- shinydashboard::dashboardPage(
                 shiny::textInput(
                   inputId = ('GroupName'),
                   value =  'Exp',
-                  label = 'Group name',
+                  label = shiny::div(
+                    "Group name",
+                    bsplus::shiny_iconlink() %>%
+                      bsplus::bs_embed_popover(title = 'If cells have been sequenced in different experiments, providind the same group name allows to merge them after normalisation.' , placement = 'right')
+                  ),
                   width = '100%'
                 )
               )
@@ -309,7 +341,11 @@ ui <- shinydashboard::dashboardPage(
             ))
           ),
           shinydashboard::box(
-            title = 'Upload references',
+            title = shiny::div(
+              'Upload references',
+              bsplus::shiny_iconlink() %>%
+                bsplus::bs_embed_popover(title = 'Bulk RT references are optional. The program allows to upload maximum one reference per group.' , placement = 'right')
+            ),
             solidHeader = T,
             status = 'primary',
             collapsible = T,
@@ -332,7 +368,11 @@ ui <- shinydashboard::dashboardPage(
                 shiny::textInput(
                   inputId = 'reference_name',
                   value =  'Reference',
-                  label = 'Reference name',
+                  label = shiny::div(
+                    'Reference name',
+                    bsplus::shiny_iconlink() %>%
+                      bsplus::bs_embed_popover(title = 'This name will be visualize on plots.' , placement = 'right')
+                  ),
                   width = '100%'
                 )
               )
@@ -364,13 +404,18 @@ ui <- shinydashboard::dashboardPage(
               width = 12,
               shiny::tableOutput('Reference_paths')
             ))
-
-
-
-          )
+          ),
+          shiny::fluidRow(shiny::column(
+            width = 3,
+            shinyjs::disabled(
+              shiny::actionButton(
+                inputId = 'Done_upload',
+                label = 'Done',
+                width = '100%'
+              )
+            )
+          ))
         )
-
-
       },
       #Diagnostic
       {
@@ -517,8 +562,10 @@ server <- function(input, output, session) {
     PerCell_file = '',
     whoiswho_file = '',
     PerCell_file_error = '',
+    first_line_Percell = NULL,
     scCN = '',
     scCN_error = '',
+    first_line_CNV = NULL,
     reference_file = '',
     groups = '',
     groups_with_a_reference = '',
@@ -684,6 +731,11 @@ server <- function(input, output, session) {
         shinyjs::disable('cores')
         shinyjs::disable('Analysis_Name')
 
+        #move to next tab
+        shinydashboard::updateTabItems(session = session,
+                                       inputId = 'Sidebar',
+                                       selected = 'Upload')
+
       }
     })
   }
@@ -730,18 +782,77 @@ server <- function(input, output, session) {
             stringr::str_detect(string = variables$whoiswho_file, pattern = ' does not have the right format') |
             input$ApplySettings != 1) {
           shinyjs::disable(id = 'Add_sample')
-
+          output$PerCell_file_out = shiny::renderText(variables$PerCell_file)
+          output$scCN_out = shiny::renderText(variables$scCN)
         } else{
-          shinyjs::enable(id = 'Add_sample')
+          if (all(!c('basename', 'group') %in% names(variables$first_line_Percell)) &
+              all(!c('basename', 'group') %in% names(variables$first_line_CNV))) {
+            #rest outputs if they had changed
+            output$PerCell_file_out = shiny::renderText(variables$PerCell_file)
+            output$scCN_out = shiny::renderText(variables$scCN)
 
+            shinyjs::enable(id = 'Add_sample')
+
+          } else if (all(c('basename', 'group') %in% names(variables$first_line_Percell)) &
+                     all(c('basename', 'group') %in% names(variables$first_line_CNV))) {
+            if (variables$first_line_Percell$basename == variables$first_line_CNV$basename &
+                variables$first_line_Percell$group == variables$first_line_CNV$group) {
+              #update file name and group name if they match
+
+              updateTextInput(
+                session = session,
+                inputId = 'FileName',
+                value = variables$first_line_Percell$basename
+              )
+              updateTextInput(
+                session = session,
+                inputId = 'GroupName',
+                value = variables$first_line_Percell$group
+              )
+
+              #rest outputs if they had changed
+              output$PerCell_file_out = shiny::renderText(variables$PerCell_file)
+              output$scCN_out = shiny::renderText(variables$scCN)
+
+              shinyjs::enable(id = 'Add_sample')
+
+            } else{
+              #sebd worning
+
+              output$PerCell_file_out = shiny::renderText(
+                '<font color=\"#FF0000\"> Basename and Group do not match between PerCell and sc tracks files!!! </b></font>'
+              )
+              output$scCN_out = shiny::renderText(
+                '<font color=\"#FF0000\"> Basename and Group do not match between PerCell and sc tracks files!!! </b></font>'
+              )
+              shinyjs::disable(id = 'Add_sample')
+            }
+          } else{
+            output$PerCell_file_out = shiny::renderText(
+              '<font color=\"#FF0000\"> Basename and Group do not match between PerCell and sc tracks files!!! </b></font>'
+            )
+            output$scCN_out = shiny::renderText(
+              '<font color=\"#FF0000\"> Basename and Group do not match between PerCell and sc tracks files!!! </b></font>'
+            )
+            shinyjs::disable(id = 'Add_sample')
+          }
         }
         #activate button to srat RT analysis
         if (nrow(variables$File_paths) > 0) {
           shinyjs::enable(id = 'Diagnostic_done')
+          shinyjs::enable(id = 'Done_upload')
         } else{
           shinyjs::disable(id = 'Diagnostic_done')
-
+          shinyjs::disable(id = 'Done_upload')
         }
+
+      })
+
+      #move to next page
+      shiny::observeEvent(input$Done_upload, {
+        shinydashboard::updateTabItems(session = session,
+                                       inputId = 'Sidebar',
+                                       selected = 'Diagnostic')
 
       })
 
@@ -803,9 +914,14 @@ server <- function(input, output, session) {
             ),
             rigth_message = variables$PerCell_file
           )
-
-          output$PerCell_file_out = shiny::renderText(variables$PerCell_file)
-
+          #read line one and look for group and basename
+          if (stringr::str_detect(
+            string = variables$PerCell_file,
+            pattern = ' does not have the right format',
+            negate = T
+          )) {
+            variables$first_line_Percell = readr::read_csv(variables$PerCell_file, n_max = 1)
+          }
 
         } else{
           variables$PerCell_file = ''
@@ -839,7 +955,14 @@ server <- function(input, output, session) {
             rigth_message = variables$scCN
           )
 
-          output$scCN_out = shiny::renderText(variables$scCN)
+          #read line one and look for group and basename
+          if (stringr::str_detect(
+            string = variables$scCN,
+            pattern = ' does not have the right format',
+            negate = T
+          )) {
+            variables$first_line_CNV = readr::read_tsv(variables$scCN, n_max = 1)
+          }
 
         } else{
           variables$scCN = ''
@@ -878,6 +1001,7 @@ server <- function(input, output, session) {
 
         }
       })
+
       # get setting path and check if it has the right format
       shiny::observeEvent(input$setting_file, {
         if (!is.numeric(input$setting_file)) {
@@ -1368,7 +1492,7 @@ server <- function(input, output, session) {
 
           variables$to_keep = unlist(variables$to_keep)
           variables$results_after_filtering = variables$results[variables$to_keep, variables$to_keep]
-          variables$basenames_after_filtering = variables$basenames[variables$to_keep, ]
+          variables$basenames_after_filtering = variables$basenames[variables$to_keep,]
 
           output$plot2_RT <- plotly::renderPlotly(
             heatmaply::heatmaply(
@@ -1409,7 +1533,7 @@ server <- function(input, output, session) {
 
           variables$to_keep = unlist(variables$to_keep)
           variables$results_after_filtering = variables$results[variables$to_keep, variables$to_keep]
-          variables$basenames_after_filtering = variables$basenames[variables$to_keep, ]
+          variables$basenames_after_filtering = variables$basenames[variables$to_keep,]
 
           output$plot2_RT <- plotly::renderPlotly(
             heatmaply::heatmaply(
@@ -1593,10 +1717,8 @@ server <- function(input, output, session) {
           )
 
           #merege reference and scRT
-          data$RTs = rbind(
-            data$scRT %>% dplyr::ungroup(),
-            data$reference %>% dplyr::ungroup()
-          )
+          data$RTs = rbind(data$scRT %>% dplyr::ungroup(),
+                           data$reference %>% dplyr::ungroup())
           ###correlationplot
           if (length(unique(data$RTs$basename)) > 1) {
             #correlation plot
@@ -1668,14 +1790,10 @@ server <- function(input, output, session) {
       shiny::observe({
         if (nrow(data$G1G2) > 0 & input$Sidebar == 'BinRep') {
           data$variabilityBR = rbind(
-            Kronos.scRT::Prepare_G1G2_phase_cells_forBinRepProb(
-              G1.G2 = data$G,
-              RT = data$RT
-            ),
-            Kronos.scRT::Prepare_S_phase_cells_forBinRepProb(
-              S = data$S,
-              RT = data$RT
-            )
+            Kronos.scRT::Prepare_G1G2_phase_cells_forBinRepProb(G1.G2 = data$G,
+                                                                RT = data$RT),
+            Kronos.scRT::Prepare_S_phase_cells_forBinRepProb(S = data$S,
+                                                             RT = data$RT)
           )
         } else{
           shinyjs::disable('Save__BinRep')

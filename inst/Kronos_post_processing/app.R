@@ -65,7 +65,11 @@ ui <- shinydashboard::dashboardPage(
           shinydashboard::box(
             width = 6,
             height = '320',
-            title = 'Input folder(s)',
+            title = shiny::div(
+              'Input folder(s)',
+              bsplus::shiny_iconlink() %>%
+                bsplus::bs_embed_popover(title = 'One or more folders created by Kronos scRT processing.' , placement = 'right')
+            ),
             solidHeader = T,
             background = 'black',
             align = 'center',
@@ -98,7 +102,7 @@ ui <- shinydashboard::dashboardPage(
             title = shiny::div(
               'Subgroup file(s)',
               bsplus::shiny_iconlink() %>%
-                bsplus::bs_embed_popover(title = 'Optional file created by the subgroup option in Dimensionality Reduction. Be aware tath this option can be used only if there are no differencens in CN between the G1/G2 subpopulations. If this is not the case, cells have to be divided accordingly and reprocessed.' , placement = 'right')
+                bsplus::bs_embed_popover(title = 'Optional file created by the subgroup option in Dimensionality Reduction. Be aware that this option can be used only if there are no differencens in CN between the G1/G2 subpopulations. If this is not the case, cells have to be divided accordingly and reprocessed.' , placement = 'right')
             ),
             solidHeader = T,
             background = 'black',
@@ -167,7 +171,7 @@ ui <- shinydashboard::dashboardPage(
               width = '100%',
               inputId = 'cores',
               label = NULL,
-              value = trunc(maxCores/2),
+              value = trunc(maxCores / 2),
               min = 1,
               max = maxCores,
               step = 1,
@@ -240,7 +244,7 @@ ui <- shinydashboard::dashboardPage(
           tabName = "BinRep",
           shiny::fluidPage(
             shiny::fluidRow(
-              column(
+              shiny::column(
                 width = 3,
                 shiny::sliderInput(
                   inputId = 'BinRep_G1_Ploidy',
@@ -252,7 +256,7 @@ ui <- shinydashboard::dashboardPage(
                   c(0.25, 0.75)
                 )
               ),
-              column(
+              shiny::column(
                 width = 3,
                 shiny::sliderInput(
                   inputId = 'BinRep_Early_Cells',
@@ -265,7 +269,7 @@ ui <- shinydashboard::dashboardPage(
                   post = '%'
                 )
               ),
-              column(
+              shiny::column(
                 width = 3,
                 shiny::sliderInput(
                   inputId = 'BinRep_Mid_Cells',
@@ -278,7 +282,7 @@ ui <- shinydashboard::dashboardPage(
                   post = '%'
                 )
               ),
-              column(
+              shiny::column(
                 width = 3,
                 shiny::sliderInput(
                   inputId = 'BinRep_Late_Cells',
