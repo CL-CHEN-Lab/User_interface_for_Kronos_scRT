@@ -19,9 +19,3 @@ Rtsne object
 \description{
 adds an option to set a seed in Rtsnee
 }
-\examples{
-\dontrun{
-TSNE(X,seed,...)
-}
-
-}

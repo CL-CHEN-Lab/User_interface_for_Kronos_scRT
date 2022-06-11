@@ -9,9 +9,9 @@ Replication_state(Samples, background, Chr_filter = NULL, cores = 3)
 \arguments{
 \item{Samples, }{a dataframe containing scCN info with the following columns:chr, start, end, group, basename, CN, index}
 
-\item{background, }{a dataframe containing the meadian scCN info of the G1/G2 population with the following columns:chr, start, end, group, basename, background}
+\item{background, }{a dataframe containing the median scCN info of the G1/G2 population with the following columns:chr, start, end, group, basename, background}
 
-\item{Chr_filter, }{filters chromosomes to keep in the analisys}
+\item{Chr_filter, }{filters chromosomes to keep in the analysis}
 
 \item{cores, }{number of threads to use while to parallelise}
 }

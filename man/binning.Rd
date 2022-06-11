@@ -29,7 +29,7 @@ binning(
 
 \item{bowtie2_index, }{bowtie2 index}
 
-\item{bin_size, }{size of the final bin in bp: defailt = 20 000}
+\item{bin_size, }{size of the final bin in bp: default = 20 000}
 
 \item{read_size, }{size of a read in bp: default= 40bp}
 
@@ -53,7 +53,7 @@ binning(
 
 \item{chr_prefix, }{prefix identifying a chromosome in the .fa file: default='chr'}
 
-\item{chr_range, }{chomosomes to considere in the analysis. Use ':' to identify a range and ',' for isolated chromosomes. default='1:22'}
+\item{chr_range, }{chromosomes to consider in the analysis. Use ':' to identify a range and ',' for isolated chromosomes. default='1:22'}
 
 \item{cores, }{number of cores to use}
 

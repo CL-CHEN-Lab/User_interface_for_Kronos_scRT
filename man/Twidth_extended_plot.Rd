@@ -4,7 +4,7 @@
 \alias{Twidth_extended_plot}
 \title{Extended Twidth plot}
 \usage{
-Twidth_extended_plot(Variability, Fitted_data, Twidth)
+Twidth_extended_plot(Variability, Fitted_data, Twidth, Color = "red")
 }
 \arguments{
 \item{Variability, }{dataframe created by either TW_RTAnnotation or TW_GenomeAnnotation}
@@ -12,6 +12,8 @@ Twidth_extended_plot(Variability, Fitted_data, Twidth)
 \item{Fitted_data, }{dataframe creted by Twidth_fit_data}
 
 \item{Twidth, }{dataframe created by Twidth}
+
+\item{Color, }{plot color (s)}
 }
 \value{
 ggplot element

@@ -2,18 +2,18 @@
 % Please edit documentation in R/split_subpop.R
 \name{split_subpop}
 \alias{split_subpop}
-\title{Splits PerCell data frame based on identified subpopulations}
+\title{Splits PerCell data frame based on identified sub-populations}
 \usage{
 split_subpop(PerCell, Supbop, group = NULL, basename = NULL)
 }
 \arguments{
 \item{PerCell, }{Kornos PerCell data frame produced by Kronos}
 
-\item{Supbop, }{Subpopulation grouping created by Kronos}
+\item{Supbop, }{Sub-population grouping created by Kronos}
 }
 \value{
 list
 }
 \description{
-Splits PerCell data frame based on identified subpopulations
+Splits PerCell data frame based on identified sub-populations
 }

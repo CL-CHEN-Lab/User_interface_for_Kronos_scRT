@@ -39,7 +39,7 @@ CallCNV(
 
 \item{max_mean_CN_accepted, }{Max mean CN accepted as result}
 
-\item{ploidy, }{user extimated ploidy}
+\item{ploidy, }{user estimated ploidy}
 
 \item{chr_prefix, }{Chromosome prefix, if there is no prefix use NULL}
 

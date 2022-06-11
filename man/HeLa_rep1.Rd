@@ -43,6 +43,6 @@ A list containing two tibbles variables:
 HeLa_rep1
 }
 \description{
-A \code{list} with two \code{tibble}: PerCell and CNV for HeLa S3 cell repicate 1. Assembly Hg38.
+A \code{list} with two \code{tibble}: PerCell and CNV for HeLa S3 cell replicate 1. Assembly Hg38.
 }
 \keyword{datasets}

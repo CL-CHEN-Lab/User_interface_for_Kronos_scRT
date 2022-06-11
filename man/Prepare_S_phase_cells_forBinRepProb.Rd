@@ -17,11 +17,11 @@ Prepare_S_phase_cells_forBinRepProb(
 
 \item{RT, }{pseudobulk replication timing dataframe}
 
-\item{Early.cells, }{percentage of replication range difying Early replicating cells (0-100)}
+\item{Early.cells, }{percentage of replication range defying Early replicating cells (0-100)}
 
-\item{Mid.cells, }{percentage of replication range difying Mid replicating cells (0-100)}
+\item{Mid.cells, }{percentage of replication range defying Mid replicating cells (0-100)}
 
-\item{Late.cells, }{percentage of replication range difying Late replicating cells (0-100)}
+\item{Late.cells, }{percentage of replication range defying Late replicating cells (0-100)}
 }
 \description{
 Prepare S phase cells for BinRepProb plots

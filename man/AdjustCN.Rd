@@ -21,7 +21,7 @@ AdjustCN(
 
 \item{Group_leves, }{Group basenames order (optional)}
 
-\item{Chr_filter, }{filters chromosomes to keep in the analisys (optional)}
+\item{Chr_filter, }{filters chromosomes to keep in the analysis (optional)}
 }
 \value{
 tibble

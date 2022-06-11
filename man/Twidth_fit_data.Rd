@@ -7,7 +7,7 @@
 Twidth_fit_data(df, ncores = 1)
 }
 \arguments{
-\item{df, }{dataframe containing the colums group and category}
+\item{df, }{dataframe containing the columns group and category}
 
 \item{cores, }{number of cores for parallelization}
 }

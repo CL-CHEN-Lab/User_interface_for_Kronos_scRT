@@ -2,18 +2,18 @@
 % Please edit documentation in R/scRT_processing.R
 \name{extractSubpop}
 \alias{extractSubpop}
-\title{separates S phase cells into subgroups and calculates relative pseudobulkRT}
+\title{separates S phase cells into sub-groups and calculates relative pseudo-bulk RT}
 \usage{
 extractSubpop(scCN, scRT, scVariability, subpopulation, RefRT = NULL)
 }
 \arguments{
-\item{scCN, }{Sphase cells scCN dataframe from Rebin function (after filtering,optional)}
+\item{scCN, }{S-phase cells scCN dataframe from Rebin function (after filtering,optional)}
 
-\item{scRT, }{pseudobulkRT dataframe}
+\item{scRT, }{pseudo-bulk-RT dataframe}
 
 \item{scVariability, }{single cell variability dataframe the Variability function}
 
-\item{subpopulation, }{dataframe containing subpopulation info (Cell,basename,group,subpopulation)}
+\item{subpopulation, }{dataframe containing sub-population info (Cell,basename,group,subpopulation)}
 
 \item{RefRT, }{Reference RT dataframe from RebinRT}
 }
@@ -21,5 +21,5 @@ extractSubpop(scCN, scRT, scVariability, subpopulation, RefRT = NULL)
 list
 }
 \description{
-separates S phase cells into subgroups and calculates relative pseudobulkRT
+separates S phase cells into sub-groups and calculates relative pseudo-bulk RT
 }

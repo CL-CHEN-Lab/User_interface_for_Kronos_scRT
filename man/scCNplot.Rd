@@ -9,7 +9,9 @@ scCNplot(
   G_scCN,
   CN_limit = 4,
   Coordinates = NULL,
-  rasterized_heatmap = F
+  rasterized_heatmap = F,
+  heatmap_color_palette = c("viridis", "inferno", "magma", "plasma", "cividis"),
+  manual_colors = NULL
 )
 }
 \arguments{
@@ -19,9 +21,13 @@ scCNplot(
 
 \item{CN_limit, }{Max number of different level to visulize from the lowest one.}
 
-\item{Coordinates, }{data frame containing chr,start and end position (multiple regions allowed, facultative)}
+\item{Coordinates, }{data frame containing chr,start and end position (multiple regions allowed, optional)}
 
 \item{rasterized_heatmap, }{logic: whether or not the heatmap should be rasterized}
+
+\item{heatmap_color_palette, }{palette choice (viridis, inferno, magma, plasma or cividis)}
+
+\item{manual_colors, }{manual colors, if provided they overwrite heatmap_color_palette}
 }
 \value{
 plot

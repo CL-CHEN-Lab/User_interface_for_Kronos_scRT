@@ -1,20 +1,20 @@
-scCN_ui <- function(id) {
-  ns <- shiny::NS(paste0('scCN',id))
+scCN_ui <- function(id,title=NULL) {
+  ns <- shiny::NS(id)
   shinydashboard::box(
     id = ns('box'),
     status = 'primary',
-    title = id,
+    title = title,
     width = 12,
     solidHeader = T,
     collapsible = T,
-    shiny::fluidRow(plotOutput(ns('plot__scCN'), height = "100%",width = '100%'))
+    shiny::fluidRow(plotOutput(ns('plot__scCN'), height = "auto",width = '100%'))
   )
 }
 
 
 scCN_server <-
   function(id, S_Traks,G_Traks,Levels=10,out,save) {
-    shiny::moduleServer(paste0('scCN',id),
+    shiny::moduleServer(id,
                         function(input,
                                  output,
                                  session,
@@ -23,7 +23,7 @@ scCN_server <-
                                  L =Levels,
                                  Out=out,
                                  Save=save,
-                                 ID=paste0('scCN',id)) {
+                                 ID=id) {
                           #load required operators
                           `%>%` = tidyr::`%>%`
 

@@ -9,7 +9,7 @@ WhoIsWho(PerCell, WhoIsWho)
 \arguments{
 \item{PerCell, }{per cell dataframe from CallCNV}
 
-\item{WhoIsWho, }{dataframe containing two colums: Cell (character) and S_Phase (logical)}
+\item{WhoIsWho, }{dataframe containing two columns: Cell (character) and S_Phase (logical)}
 }
 \value{
 tibble

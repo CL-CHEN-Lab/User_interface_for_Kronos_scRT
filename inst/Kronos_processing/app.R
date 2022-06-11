@@ -1,3 +1,8 @@
+#options
+options(stringsAsFactors = FALSE,
+        dplyr.summarise.inform=FALSE,
+        warn = 1,
+        scipen = 999)
 #load operators
 `%>%` = tidyr::`%>%`
 `%dopar%` = foreach::`%dopar%`
@@ -6,13 +11,13 @@
 #set theme for plots
 ggplot2::theme_set(new = ggplot2::theme_bw())
 
-#funtion to close app
+#function to close app
 jscode <- "shinyjs.closeWindow = function() { window.close(); }"
 
 #number of available cores
 maxCores = parallel::detectCores()
 
-# Define UI for application that draws a histogram
+# Define UI
 ui <- shinydashboard::dashboardPage(
   title = 'Kronos scRT',
   skin = 'yellow',
@@ -30,16 +35,6 @@ ui <- shinydashboard::dashboardPage(
                                tabName = 'Diagnostic'),
       shinydashboard::menuItem(text = "Filter Cells",
                                tabName = "FilterCells"),
-      shinydashboard::menuItem(
-        text = "Variability",
-        tabName = "Variability",
-        shinydashboard::menuSubItem(text = 'Bin Replication', tabName = 'BinRep'),
-        shinydashboard::menuSubItem(text = 'T-width', tabName = 'Twidth')
-      ),
-      shinydashboard::menuItem(text = "Dimensionality Reduction",
-                               tabName = "DRed"),
-      shinydashboard::menuItem(text = "scPlots",
-                               tabName = "scPlots"),
       shinydashboard::menuItem(text = "Exit",
                                tabName = "Exit")
     )
@@ -122,7 +117,7 @@ ui <- shinydashboard::dashboardPage(
             title = shiny::div(
               'Chr prefix to use',
               bsplus::shiny_iconlink() %>%
-                bsplus::bs_embed_popover(title = 'Depending on your reference genome, chromosomes or scaffolds could be named differntly. Please, privide the prefix that preceeds the chromosome or scaffold number. If no prefix is present this box has to be emptied.' , placement = 'right')
+               bsplus::bs_embed_popover(title = 'Depending on your reference genome, chromosomes or scaffolds could be named differently. Please, provide the prefix that precedes the chromosome or scaffold number. If no prefix is present this box has to be emptied.' , placement = 'right')
             ),
             solidHeader = T,
             background = 'black',
@@ -200,8 +195,9 @@ ui <- shinydashboard::dashboardPage(
             solidHeader = T,
             background = 'black',
             align = 'center',
+            shinyjs::disabled(
             shiny::actionButton(inputId =  'ApplySettings', label =
-                                  'Apply settings')
+                                  'Apply settings'))
           )
         )
 
@@ -260,7 +256,7 @@ ui <- shinydashboard::dashboardPage(
                   label = shiny::div(
                     'Setting file',
                     bsplus::shiny_iconlink() %>%
-                      bsplus::bs_embed_popover(title = 'Optinal. If this dataset has been used in a previous analysis the produced setting file can be reused.' , placement = 'right')
+                      bsplus::bs_embed_popover(title = 'Optional. If this dataset has been used in a previous analysis the produced setting file can be reused.' , placement = 'right')
                   ),
                   title =  "Setting file",
                   multiple = F,
@@ -279,7 +275,7 @@ ui <- shinydashboard::dashboardPage(
                   label = shiny::div(
                     "Who's who file",
                     bsplus::shiny_iconlink() %>%
-                      bsplus::bs_embed_popover(title = 'Optinal. A file containing experimental cell staging information. Such a file has to containin cell identifiers under the colums Cell and logical values under the colums S_Phase. (TRUE = a cell is in S phase, FALSE = a cell is in G1 or G2 phase)' , placement = 'right')
+                      bsplus::bs_embed_popover(title = 'Optional. A file containing experimental cell staging information. Such a file has to containing cell identifiers under the columns Cell and logical values under the columns S_Phase. (TRUE = a cell is in S phase, FALSE = a cell is in G1 or G2 phase)' , placement = 'right')
                   ),
                   title =  "Who's who file",
                   multiple = F,
@@ -308,10 +304,10 @@ ui <- shinydashboard::dashboardPage(
                 shiny::textInput(
                   inputId = ('GroupName'),
                   value =  'Exp',
-                  label = shiny::div(
+                 label = shiny::div(
                     "Group name",
                     bsplus::shiny_iconlink() %>%
-                      bsplus::bs_embed_popover(title = 'If cells have been sequenced in different experiments, providind the same group name allows to merge them after normalisation.' , placement = 'right')
+                      bsplus::bs_embed_popover(title = 'If cells have been sequenced in different experiments, providing the same group name allows to merge them after normalization.' , placement = 'right')
                   ),
                   width = '100%'
                 )
@@ -431,7 +427,7 @@ ui <- shinydashboard::dashboardPage(
                                 )))
 
       },
-      #FilterCells
+      #Filter Cells
       {
         shinydashboard::tabItem(
           tabName = 'FilterCells',
@@ -451,16 +447,16 @@ ui <- shinydashboard::dashboardPage(
           )),
           shiny::fluidRow(
             shiny::column(width = 6,
-                          plotly::plotlyOutput('plot1_RT')),
+                          plotly::plotlyOutput('plot1_RT',width = '100%',height = 'auto')),
             shiny::column(width = 6,
-                          plotly::plotlyOutput('plot2_RT'))
+                          plotly::plotlyOutput('plot2_RT',width = '100%',height = 'auto'))
           ),
 
           shiny::fluidRow(shiny::column(
             width = 3,
             shiny::actionButton(
               inputId = 'RT_next',
-              label = "Finalise",
+              label = "Finalize",
               width = '100%'
             )
           )),
@@ -468,85 +464,10 @@ ui <- shinydashboard::dashboardPage(
             shiny::column(
               width = 12,
               align = 'center',
-              shiny::plotOutput('plot3_RT', width = '100%')
+              shiny::htmlOutput('END')
             )
           )
 
-        )
-      },
-      #twidth
-      {
-        shinydashboard::tabItem(tabName = "Twidth",
-                                shiny::uiOutput('TW_ui'))
-      },
-      #bin prob
-      {
-        shinydashboard::tabItem(tabName = "BinRep",
-                                shiny::uiOutput('BinRep_ui'),
-                                shiny::fluidRow(shiny::column(
-                                  width = 2,
-                                  shiny::actionButton(
-                                    inputId = 'Save__BinRep',
-                                    label = 'Save',
-                                    width = '100%'
-                                  )
-                                )))
-      },
-      #Dred
-      {
-        shinydashboard::tabItem(tabName = "DRed",
-                                Dim_red_ui('Dred'))
-      },
-      #scPlots
-      {
-        shinydashboard::tabItem(
-          tabName = 'scPlots',
-          shiny::fluidRow(
-            shiny::column(
-              width = 2,
-              shiny::selectInput(
-                inputId = 'Chr__scPlot',
-                label = 'Chrmosome',
-                choices =  list('Chrom'),
-                selected = 'Chrom',
-                multiple = F,
-                width = '100%'
-              )
-            ),
-            shiny::column(
-              width = 5,
-              shiny::sliderInput(
-                width = '100%',
-                inputId = 'range__scPlot',
-                label = 'Coodrinates',
-                min = 0,
-                max = 0,
-                value = c(0, 0),
-                dragRange = TRUE,
-                post = 'Mb'
-              )
-            ),
-            shiny::column(
-              width = 3,
-              shiny::radioButtons(
-                inputId = 'what__scPlot',
-                label = 'Filling',
-                choices = c('scRT', 'scCN', 'Norm. scCN'),
-                selected = 'scRT',
-                inline = T,
-                width = '100%'
-              )
-            ),
-            shiny::column(
-              width = 2,
-              shiny::actionButton(
-                inputId = 'Save__scPlot',
-                label = 'Save',
-                width = '100%'
-              )
-            )
-          ),
-          shiny::uiOutput('scPlots_UI')
         )
       })
   )
@@ -582,19 +503,8 @@ server <- function(input, output, session) {
   )
   #store diagnostic module info
   diagnostic_module_ls = shiny::reactiveValues(ui = list(),
-                                               menu = list(),
                                                server = list())
 
-  #store scPlots module info
-  scPlot_module_ls = shiny::reactiveValues(ui = list(),
-                                           server = list())
-
-  #store TW module info
-  Twidth_module_ls = shiny::reactiveValues(ui = list(),
-                                           server = list())
-  #store BinRep module info
-  BinRep_module_ls = shiny::reactiveValues(ui = list(),
-                                           server = list())
   #store data
   data = shiny::reactiveValues(
     PerCell = dplyr::tibble(),
@@ -602,15 +512,14 @@ server <- function(input, output, session) {
     whoswho = dplyr::tibble(),
     setting = dplyr::tibble(),
     reference = dplyr::tibble(),
-    scRT = dplyr::tibble(),
     variability = dplyr::tibble(),
-    variabilityBR = dplyr::tibble(),
+    scRT = dplyr::tibble(),
     G1G2 = dplyr::tibble()
   )
 
   #load
   shiny::observe({
-    #add tabitems in diagnostic
+    #add tab items in diagnostic
     output$Diagnostic_UI = shiny::renderUI({
       diagnostic_module_ls$ui
     })
@@ -712,7 +621,7 @@ server <- function(input, output, session) {
       }
     })
 
-    shiny::observe({
+    shiny::observeEvent(input$Chr_size,{
       if (!is.numeric(input$Chr_size) & input$ApplySettings == 0) {
         shinyjs::enable('ApplySettings')
       } else{
@@ -722,14 +631,14 @@ server <- function(input, output, session) {
 
     shiny::observeEvent(input$ApplySettings, {
       if (input$ApplySettings == 1) {
-        shinyjs::disable('ApplySettings')
-        shinyjs::disable('binsize')
-        shinyjs::disable('Chr_size')
-        shinyjs::disable('chr_range')
-        shinyjs::disable('chr_prefix')
-        shinyjs::disable('Output_dir')
-        shinyjs::disable('cores')
-        shinyjs::disable('Analysis_Name')
+          shinyjs::disable('ApplySettings')
+          shinyjs::disable('binsize')
+          shinyjs::disable('Chr_size')
+          shinyjs::disable('chr_range')
+          shinyjs::disable('chr_prefix')
+          shinyjs::disable('Output_dir')
+          shinyjs::disable('cores')
+          shinyjs::disable('Analysis_Name')
 
         #move to next tab
         shinydashboard::updateTabItems(session = session,
@@ -774,7 +683,7 @@ server <- function(input, output, session) {
         )
       })
 
-      #activate deactivate Add input butto
+      #activate deactivate Add input button
       shiny::observe({
         if (variables$PerCell_file == '' | variables$scCN == '' |
             stringr::str_detect(string = variables$PerCell_file, pattern = ' does not have the right format') |
@@ -817,7 +726,7 @@ server <- function(input, output, session) {
               shinyjs::enable(id = 'Add_sample')
 
             } else{
-              #sebd worning
+              #set warning
 
               output$PerCell_file_out = shiny::renderText(
                 '<font color=\"#FF0000\"> Basename and Group do not match between PerCell and sc tracks files!!! </b></font>'
@@ -1144,14 +1053,14 @@ server <- function(input, output, session) {
         variables$File_paths = rbind(variables$File_paths,
                                      newline)
 
-        #call diagnosti module
+        #call diagnostic module
         diagnostic_module_ls$ui[[paste0(input$FileName)]] = diagnostic_ui(id = input$FileName)
         diagnostic_module_ls$server[[paste0(input$FileName)]] = diagnostic_server(
           id = input$FileName,
           PerCell = data$PerCell %>%
             dplyr::filter(basename ==
                             input$FileName),
-          #if setting is not there return embpyt tibble
+          #if setting is not there return empty tibble
           Setting = tryCatch(
             data$setting %>%
               dplyr::filter(basename ==
@@ -1164,7 +1073,7 @@ server <- function(input, output, session) {
           OutFolder = file.path(variables$roots['OutputFolder'], input$Analysis_Name)
         )
 
-        #upadte Remove_sample
+        #update Remove_sample
         shiny::updateSelectInput(
           inputId = 'Remove_sample',
           choices = c('Sample', variables$File_paths$basename)
@@ -1214,7 +1123,7 @@ server <- function(input, output, session) {
           diagnostic_module_ls$ui[[input$Remove_sample]] = NULL
           diagnostic_module_ls$server[[input$Remove_sample]] = NULL
 
-          #upadte Remove_sample
+          #update Remove_sample
           shiny::updateSelectInput(
             inputId = 'Remove_sample',
             choices = c('Sample', variables$File_paths$basename),
@@ -1466,7 +1375,7 @@ server <- function(input, output, session) {
 
 
           output$plot1_RT <- plotly::renderPlotly(
-            heatmaply::heatmaply(
+            {heatmaply::heatmaply(
               x = variables$results,
               colors = variables$color,
               dendrogram = F,
@@ -1479,7 +1388,7 @@ server <- function(input, output, session) {
                 showlegend = FALSE,
                 legend = FALSE,
                 annotations = list(visible = FALSE)
-              )
+              )}
           )
 
           variables$to_keep = foreach::foreach(i = unique(variables$basenames$Group)) %do% {
@@ -1494,7 +1403,7 @@ server <- function(input, output, session) {
           variables$results_after_filtering = variables$results[variables$to_keep, variables$to_keep]
           variables$basenames_after_filtering = variables$basenames[variables$to_keep,]
 
-          output$plot2_RT <- plotly::renderPlotly(
+          output$plot2_RT <- plotly::renderPlotly({
             heatmaply::heatmaply(
               x = variables$results_after_filtering,
               colors = variables$color,
@@ -1508,7 +1417,7 @@ server <- function(input, output, session) {
                 showlegend = FALSE,
                 legend = FALSE,
                 annotations = list(visible = FALSE)
-              )
+              )}
           )
           #bring the user to FilterCells
           shinydashboard::updateTabItems(session = session,
@@ -1698,7 +1607,7 @@ server <- function(input, output, session) {
           rm('PerCell')
           rm('new_index_list')
 
-          #calculate psudobulk
+          #calculate psudo bulk
           data$scRT = Kronos.scRT::pseudoBulkRT(data$signal_smoothed)
 
           readr::write_tsv(
@@ -1716,34 +1625,10 @@ server <- function(input, output, session) {
             col_names = T
           )
 
-          #merege reference and scRT
+          #merge reference and scRT
           data$RTs = rbind(data$scRT %>% dplyr::ungroup(),
                            data$reference %>% dplyr::ungroup())
-          ###correlationplot
-          if (length(unique(data$RTs$basename)) > 1) {
-            #correlation plot
-            p_pairs = Kronos.scRT::KCorr_plot(data$RTs)
 
-            output$plot3_RT <- shiny::renderPlot({
-              p_pairs
-            },
-            height = function() {
-              session$clientData[[paste0('output_plot3_RT_out_width')]]
-            })
-
-            ggplot2::ggsave(
-              plot = p_pairs,
-              filename = file.path(
-                variables$roots['OutputFolder'],
-                input$Analysis_Name,
-                paste0(
-                  input$Analysis_Name,
-                  '_pair_scatter_plot_RTs.pdf'
-                )
-              ),
-              device = grDevices::cairo_pdf
-            )
-          }
           #prepare for twidth
           data$variability = Kronos.scRT::Variability(S_scCN = data$signal_smoothed,
                                                       scRT = data$scRT)
@@ -1758,86 +1643,13 @@ server <- function(input, output, session) {
             col_names = T
           )
 
+          output$END <- shiny::renderText({'<h3><font color=\"#FF0000\"> DONE! </b></font></h3>' })
+
         }
       })
       ########RT second part end
 
     }
-    ##### twidth start
-    {
-      shiny::observe({
-        if (nrow(data$variability) > 0 & input$Sidebar == 'Twidth') {
-          Twidth_module_ls$ui = lapply(unique(data$variability$group), function(x)
-            Twidth_ui(x))
-          output$TW_ui <- shiny::renderUI(Twidth_module_ls$ui)
-
-          Twidth_module_ls$server = lapply(unique(data$variability$group), function(x)
-            Twidth_server(
-              id = x,
-              variability = data$variability %>% dplyr::filter(group == x),
-              out = file.path(variables$roots['OutputFolder'],
-                              input$Analysis_Name, 'Twidth'),
-              cores = input$cores
-            ))
-        }
-      })
-
-    }
-    ##### twidth end
-
-    ###binprobrep start
-    {
-      shiny::observe({
-        if (nrow(data$G1G2) > 0 & input$Sidebar == 'BinRep') {
-          data$variabilityBR = rbind(
-            Kronos.scRT::Prepare_G1G2_phase_cells_forBinRepProb(G1.G2 = data$G,
-                                                                RT = data$RT),
-            Kronos.scRT::Prepare_S_phase_cells_forBinRepProb(S = data$S,
-                                                             RT = data$RT)
-          )
-        } else{
-          shinyjs::disable('Save__BinRep')
-        }
-      })
-
-      shiny::observeEvent(input$Save__BinRep, {
-        if (input$Save__BinRep > 0) {
-          variables$Save__BinRep = T
-          shinyjs::disable('Save__BinRep')
-        }
-      })
-
-      shiny::observe({
-        if (nrow(data$variabilityBR) > 0) {
-          Groups = unique(data$variabilityBR$group)
-
-          BinRep_module_ls$ui = lapply(Groups, function(x)
-            BinRepProb_ui(x))
-          BinRep_module_ls$server = lapply(Groups, function(x)
-            BinRepProb_server(
-              x,
-              variabilityBR = data$variabilityBR,
-              out = file.path(
-                variables$roots['OutputFolder'],
-                input$Analysis_Name,
-                'BinsRepProb'
-              ) ,
-              save = variables$Save__BinRep
-            ))
-          output$BinRep_ui <- shiny::renderUI(BinRep_module_ls$ui)
-          shinyjs::enable('Save__BinRep')
-          if (variables$Save__BinRep) {
-            variables$Save__BinRep = F
-          }
-        }
-
-
-
-      })
-
-    }
-    ### binprobrep end
-
 
     #reference
     {
@@ -1952,119 +1764,7 @@ server <- function(input, output, session) {
 
     }
   }
-  #scPlots
 
-  shiny::observe({
-    if (input$Sidebar == 'scPlots' & ncol(data$scRT) != 0) {
-      shiny::updateSelectInput(inputId = 'Chr__scPlot',
-                               choices = unique(data$scRT$chr))
-
-      data$summary = data$signal_smoothed %>%
-        dplyr::ungroup() %>%
-        dplyr::summarise(CN_bg = round(stats::quantile(CN_bg, c(0.01, 0.99)), 1),
-                         CN = round(stats::quantile(CN, c(0.01, 0.99)), 1))
-
-
-      # change chrom
-      shiny::observeEvent(input$Chr__scPlot, {
-        if (input$Chr__scPlot != 'Chrom') {
-          # update min max range
-          Max = data$scRT %>% dplyr::filter(chr == input$Chr__scPlot) %>% dplyr::pull(end) %>%
-            max() / 10 ^ 6
-          Step = abs(data$scRT[1, 'start'] - data$scRT[1, 'end']) / 10 ^ 6
-
-          shiny::updateSliderInput(
-            inputId = 'range__scPlot',
-            min = 0,
-            max = Max,
-            value = c(0, Max),
-            step = Step
-          )
-
-        }
-
-      })
-      ####create folder plots and set to save
-      shiny::observeEvent(input$Save__scPlot, {
-        if (!dir.exists(file.path(variables$roots['OutputFolder'],
-                                  input$Analysis_Name, 'scPlots'))) {
-          dir.create(file.path(variables$roots['OutputFolder'],
-                               input$Analysis_Name, 'scPlots'),
-                     recursive = T)
-        }
-        shinyjs::disable('Save__scPlots')
-        variables$Save__scPlots = T
-      })
-
-
-      shiny::observeEvent(c(
-        input$range__scPlot,
-        input$what__scPlot,
-        input$Save__scPlots
-      ),
-      {
-        for (g in unique(data$RTs$group)) {
-          scPlot_module_ls$ui[[g]] = scPlots_ui(g)
-          scPlot_module_ls$server[[g]] = scPlots_server(
-            g,
-            RTs = data$RTs %>%
-              dplyr::filter(
-                group == g,
-                chr == input$Chr__scPlot,
-                start > input$range__scPlot[1] *
-                  10 ^ 6,
-                end < input$range__scPlot[2] *
-                  10 ^ 6
-              ),
-            scCN = data$signal_smoothed %>%
-              dplyr::filter(
-                group == g,
-                chr == input$Chr__scPlot,
-                start >= input$range__scPlot[1] *
-                  10 ^ 6,
-                end <= input$range__scPlot[2] *
-                  10 ^ 6
-              ),
-            filling = input$what__scPlot,
-            Extreme_values = data$summary,
-            out = file.path(variables$roots['OutputFolder'],
-                            input$Analysis_Name, 'scPlots'),
-            save = variables$Save__scPlots
-          )
-          if (variables$Save__scPlots) {
-            variables$Save__scPlots = F
-            shinyjs::enable('Save__scPlots')
-
-          }
-
-
-        }
-        output$scPlots_UI = shiny::renderUI({
-          scPlot_module_ls$ui
-        })
-      })
-
-
-    } else{
-      shinyjs::disable('Save__scPlots')
-
-    }
-  })
-
-
-  # Dimensionality reduction
-  shiny::observe({
-    if (input$Sidebar == 'DRed' & ncol(data$scRT) != 0) {
-      #call Dim_red_server
-      Dred = Dim_red_server(
-        id = 'Dred',
-        scCN = data$signal_smoothed,
-        out =  file.path(variables$roots['OutputFolder'],
-                         input$Analysis_Name),
-        cores = input$cores
-      )
-    }
-  })
 
   ####exit
   {

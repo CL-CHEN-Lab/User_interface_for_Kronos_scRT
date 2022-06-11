@@ -13,7 +13,7 @@ reshape_and_save(Reads, Chrom, ID, path = "./")
 
 \item{path, }{path where to save the file}
 
-\item{Chr, }{Chromosome from wich the reads are originated}
+\item{Chr, }{Chromosome from which the reads are originated}
 }
 \description{
 Reshapes data into fastq format and save them into a file

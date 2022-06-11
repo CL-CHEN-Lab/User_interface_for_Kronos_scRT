@@ -9,7 +9,7 @@ BamMetrics(Bamfile, isPE = T)
 \arguments{
 \item{Bamfile, }{a bam file directory}
 
-\item{isPE, }{logical value indicateding whether reads are PE (TRUE) or SE (FALSE)}
+\item{isPE, }{logical value indicating whether reads are PE (TRUE) or SE (FALSE)}
 }
 \description{
 recover metrics from bam files

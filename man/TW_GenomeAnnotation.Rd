@@ -2,15 +2,15 @@
 % Please edit documentation in R/Variability_functions.R
 \name{TW_GenomeAnnotation}
 \alias{TW_GenomeAnnotation}
-\title{Annotate Variability dataframe with a costumized annotation}
+\title{Annotate Variability dataframe with a customized annotation}
 \usage{
 TW_GenomeAnnotation(Variability, GenomeAnnotation)
 }
 \arguments{
 \item{Variability, }{dataframe created by Kronos}
 
-\item{GenomeAnnotation, }{a dataFrame containing chr, start, end and annotation colums.}
+\item{GenomeAnnotation, }{a dataFrame containing chr, start, end and annotation columns.}
 }
 \description{
-Annotate Variability dataframe with a costumized annotation
+Annotate Variability dataframe with a customized annotation
 }

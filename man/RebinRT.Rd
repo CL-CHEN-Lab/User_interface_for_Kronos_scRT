@@ -11,7 +11,7 @@ RebinRT(RT, Bins, Chr_filter = NULL, Basename = NULL, Group = NULL)
 
 \item{Bins, }{a GenomicRanges object with genomic binning}
 
-\item{Chr_filter, }{filters chromosomes to keep in the analisys}
+\item{Chr_filter, }{filters chromosomes to keep in the analysis}
 }
 \value{
 tibble

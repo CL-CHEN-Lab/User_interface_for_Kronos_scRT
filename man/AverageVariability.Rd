@@ -2,7 +2,7 @@
 % Please edit documentation in R/Variability_functions.R
 \name{AverageVariability}
 \alias{AverageVariability}
-\title{Calculates the proportion of bins replicated in function of time}
+\title{Calculates the proportion of replicated bins in function of time}
 \usage{
 AverageVariability(Variability)
 }
@@ -13,5 +13,5 @@ AverageVariability(Variability)
 ggplot element
 }
 \description{
-Calculates the proportion of bins replicated in function of time
+Calculates the proportion of replicated bins in function of time
 }

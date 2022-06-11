@@ -1,13 +1,18 @@
+#options
+options(stringsAsFactors = FALSE,
+        dplyr.summarise.inform=FALSE,
+        warn = 1,
+        scipen = 999)
 #load operator
 `%>%` = tidyr::`%>%`
 #set ggplot theme
 ggplot2::theme_set(new = ggplot2::theme_bw())
-#java function to close this app
+#Java function to close this app
 jscode <- "shinyjs.closeWindow = function() { window.close(); }"
-#find max numebr of cores
+#find max number of cores
 maxCores = parallel::detectCores()
 
-# Define UI for application that draws a histogram
+# Define UI
 ui <- shinydashboard::dashboardPage(
   title = 'Kronos scRT',
   skin = 'red',
@@ -201,8 +206,8 @@ ui <- shinydashboard::dashboardPage(
               shinyjs::disabled(
                 shinyFiles::shinySaveButton(
                   id = 'Save_plots',
-                  label = 'Save diagnostic Plot',
-                  title = 'Save diagnostic Plot',
+                  label = 'Save diagnostic plot',
+                  title = 'Save diagnostic plot',
                   filetype = '.pdf',
                   style = 'width:75%;'
                 )
@@ -365,7 +370,7 @@ ui <- shinydashboard::dashboardPage(
             )
           ),
           shinydashboard::box(
-            title = 'Advance Options',
+            title = 'Advanced options',
             status = 'primary',
             solidHeader = T,
             width = '100%',
@@ -433,7 +438,7 @@ ui <- shinydashboard::dashboardPage(
                 label = shiny::div(
                   'Chromosome prefix',
                   bsplus::shiny_iconlink() %>%
-                    bsplus::bs_embed_popover(title = 'Depending on your reference genome, chromosomes or scaffolds could be named differntly. Please, privide the prefix that preceeds the chromosome or scaffold number. If no prefix is present this box has to be emptied.' , placement = 'right')),
+                    bsplus::bs_embed_popover(title = 'Depending on your reference genome, chromosomes or scaffolds could be named differently. Please, provide the prefix that precedes the chromosome or scaffold number. If no prefix is present this box has to be emptied.' , placement = 'right')),
                   value = 'chr',
                   width = '100%'
                 )
@@ -521,7 +526,7 @@ ui <- shinydashboard::dashboardPage(
                 inputId = 'CHR_CN',
                 label = shiny::div('Chromosome prefix',
                                    bsplus::shiny_iconlink() %>%
-                                     bsplus::bs_embed_popover(title = 'Depending on your reference genome, chromosomes or scaffolds could be named differntly. Please, privide the prefix that preceeds the chromosome or scaffold number. If no prefix is present this box has to be emptied.' , placement = 'right')
+                                     bsplus::bs_embed_popover(title = 'Depending on your reference genome, chromosomes or scaffolds could be named differently. Please, provide the prefix that precedes the chromosome or scaffold number. If no prefix is present this box has to be emptied.' , placement = 'right')
                 ),
                 value = 'chr',
                 width = '100%'
@@ -553,7 +558,7 @@ ui <- shinydashboard::dashboardPage(
             )
           ),
           shinydashboard::box(
-            title = 'Advance Options',
+            title = 'Advanced options',
             status = 'primary',
             solidHeader = T,
             width = 12,
@@ -576,9 +581,9 @@ ui <- shinydashboard::dashboardPage(
               width = 12,
               shiny::radioButtons(
                 inputId = 'Ploidy_Restrictions_CN',
-                label = div('Ploidy Restrictions',
+                label = div('Ploidy restrictions',
                             bsplus::shiny_iconlink() %>%
-                              bsplus::bs_embed_popover(title = 'If Fix Ploidy Range is selected, the software selects the most appropriated ploidy in the ragne and calculates the cofidence associated. If Fix Average Ploidy is selected, cells are imposed the closest possible ploidy to the average one and does not calculate the confidence of this calling.' , placement = 'right')
+                              bsplus::bs_embed_popover(title = 'If Fix Ploidy Range is selected, the software selects the most appropriated ploidy in the range and calculates the associated confidence. If Fix Average Ploidy is selected, cells are imposed the closest possible ploidy to the average one and does not calculate the confidence of this calling.' , placement = 'right')
                 ),
                 choices = c('Fix Average Ploidy', 'Fix Ploidy Range'),
                 inline = T,
@@ -620,7 +625,7 @@ ui <- shinydashboard::dashboardPage(
                 inputId = 'group_CN',
                 label = shiny::div('Sample group',
                                    bsplus::shiny_iconlink() %>%
-                                     bsplus::bs_embed_popover(title = 'If cells have been sequenced in different experiments, providind the same group name allows to merge them after normalisation. It can be modified later on in the analysis.' , placement = 'right')),
+                                     bsplus::bs_embed_popover(title = 'If cells have been sequenced in different experiments, providing the same group name allows to merge them after normalization. It can be modified later on in the analysis.' , placement = 'right')),
                 value = 'Exp',
                 width = '100%'
               )
@@ -669,7 +674,7 @@ ui <- shinydashboard::dashboardPage(
     roots = c(shinyFiles::getVolumes()(),
               Home = Sys.getenv("HOME"))
 
-    #set shinyFiles buttos
+    #set shinyFiles buttons
     shinyFiles::shinyDirChoose(
       input = input,
       id = 'Fastq',
@@ -743,7 +748,7 @@ ui <- shinydashboard::dashboardPage(
         shiny::stopApp()
       })
 
-      #loadr tex input if PE format
+      #load tex input if PE format
       shiny::observeEvent(input$reads_type, {
         if (input$reads_type != 'SE') {
           output$patter_sample = shiny::renderUI({
@@ -751,7 +756,7 @@ ui <- shinydashboard::dashboardPage(
               width = 3,
               shiny::textInput(
                 inputId = 'R1',
-                label = 'Pattern to identiry R1 fastq',
+                label = 'Pattern to identify R1 fastq',
                 value = '_R1'
               )
             ),
@@ -759,7 +764,7 @@ ui <- shinydashboard::dashboardPage(
               width = 3,
               shiny::textInput(
                 inputId = 'R2',
-                label = 'Pattern to identiry R2 fastq',
+                label = 'Pattern to identify R2 fastq',
                 value = '_R2'
               )
             ))
@@ -1140,13 +1145,13 @@ ui <- shinydashboard::dashboardPage(
                 )
               ) %>%
               dplyr::ungroup()
-            #initialise Plot_selection
+            #initialize Plot_selection
             variables$Metrics$Color = 'red'
             #active buttons
             shinyjs::enable('Save_plots')
             shinyjs::enable('Save_table')
 
-            #update selec parameters
+            #update select parameters
             shiny::updateRadioButtons(
               session = session,
               inputId = 'final_table_selector',
@@ -1221,7 +1226,7 @@ ui <- shinydashboard::dashboardPage(
       #reset with dbclick
       shiny::observeEvent(input$final_plot_dclick1,
                           {
-                            #initialise reset
+                            #initialize reset
                             variables$Metrics = variables$Metrics %>%
                               dplyr::mutate(Color = 'red')
                           })
@@ -1250,7 +1255,7 @@ ui <- shinydashboard::dashboardPage(
             )
           ) +
           ggplot2::scale_y_continuous(
-            labels = function(x)
+           labels = function(x)
               sprintf(fmt = '%.1f', x)
           ) +
           ggforce::facet_row(
@@ -1775,7 +1780,7 @@ ui <- shinydashboard::dashboardPage(
           width = 3,
           shiny::numericInput(
             inputId = 'meanPloidy_CN',
-            label = 'Average Ploidy',
+            label = 'Average ploidy',
             value = 2,
             min = 1,
             step = 0.1,
@@ -1793,7 +1798,7 @@ ui <- shinydashboard::dashboardPage(
             width = 3,
             shiny::numericInput(
               inputId = 'minPloidy_CN',
-              label = 'Min accepted Ploidy',
+              label = 'Min accepted ploidy',
               value = 2,
               min = 0,
               step = 0.1,

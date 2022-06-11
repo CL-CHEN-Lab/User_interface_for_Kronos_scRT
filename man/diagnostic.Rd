@@ -2,7 +2,7 @@
 % Please edit documentation in R/Diagnostic.R
 \name{diagnostic}
 \alias{diagnostic}
-\title{Helps identifying parameters for scRT analysis. It opends a shiny app}
+\title{Helps identifying parameters for scRT analysis. It opens a shiny app}
 \usage{
 diagnostic(
   PerCell,
@@ -20,11 +20,27 @@ diagnostic(
 \arguments{
 \item{PerCell, }{per cell dataframe from CallCNV}
 
+\item{interactive, }{if TRUE the function will start a shiny app}
+
+\item{min_RPMPH, }{min number of reads per megabase per haplotype for a cell to be considered}
+
+\item{G1G2_th, }{variability value under which cells are considered in G1/G2}
+
+\item{S_th, }{variability value above which cells are considered in S}
+
+\item{First_half_factor, }{parameter to adjust the first part of the S-phase}
+
+\item{Second_half_factor, }{parameter to adjust the second part of the S-phase}
+
+\item{Automatic_correction, }{If TRUE it tries to automatically find the parameters to adjust the S-phase}
+
+\item{lunch.in.Rstudio, }{if TRUE the shiny app is run in Rstudio otherwise on a browser.}
+
 \item{cores, }{number of cores to parallelise}
 }
 \value{
 list
 }
 \description{
-Helps identifying parameters for scRT analysis. It opends a shiny app
+Helps identifying parameters for scRT analysis. It opens a shiny app
 }

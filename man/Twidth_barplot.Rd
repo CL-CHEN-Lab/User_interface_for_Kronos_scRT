@@ -4,14 +4,14 @@
 \alias{Twidth_barplot}
 \title{Twidth barplotplot}
 \usage{
-Twidth_barplot(Variability, Twidth)
+Twidth_barplot(Variability, Twidth, Color = "lightblue")
 }
 \arguments{
 \item{Variability, }{dataframe created by either TW_RTAnnotation or TW_GenomeAnnotation}
 
 \item{Twidth, }{dataframe created by Twidth}
 
-\item{Fitted_data, }{dataframe creted by Twidth_fit_data}
+\item{Color, }{barplot color(s)}
 }
 \value{
 ggplot element

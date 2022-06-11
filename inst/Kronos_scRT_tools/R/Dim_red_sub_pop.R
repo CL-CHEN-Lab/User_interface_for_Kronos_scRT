@@ -1,6 +1,5 @@
 Dim_red_sub_pop_ui = function(id) {
-  ns <- shiny::NS(paste0('Dred', id))
-
+  ns <- shiny::NS(id)
   shiny::fluidPage(
     shinyjs::useShinyjs(),
     shiny::fluidRow(
@@ -10,7 +9,7 @@ Dim_red_sub_pop_ui = function(id) {
         offset = 1,
         shiny::radioButtons(
           inputId = ns('setting'),
-          label = 'Chose dimentsionality reduction',
+          label = 'Dimensionality reduction type',
           choices = c('UMAP', 'T-SNE'),
           inline = T,
           selected = 'UMAP',
@@ -69,7 +68,7 @@ Dim_red_sub_pop_ui = function(id) {
       )
     ),
     shiny::fluidRow(align = 'center',
-                    shiny::plotOutput(ns('dred_out'), width = '100%')),
+                    shiny::plotOutput(ns('dred_out'), width = '100%',height = 'auto')),
     shiny::fluidRow(
       shiny::column(
         width = 3,
@@ -118,8 +117,6 @@ Dim_red_sub_pop_ui = function(id) {
         inputId = ns('start_subpop'),
         label = 'Sub-pop mode',
         value = F,
-        onLabel = 'On',
-        offLabel = 'Off',
         inline = T,
         labelWidth = '100%',
         disabled = T,
@@ -135,7 +132,7 @@ Dim_red_sub_pop_ui = function(id) {
 
 
 Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3) {
-  shiny::moduleServer(paste0('Dred', id),
+  shiny::moduleServer(id,
                       function(input,
                                output,
                                session,
@@ -146,7 +143,7 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3) {
                         #load required operators
                         `%>%` = tidyr::`%>%`
 
-                        #initialise
+                        #initialize
                         Data_to_plot = reactiveValues(
                           selected_data = dplyr::tibble(),
                           scCNV = dplyr::tibble(),
@@ -208,7 +205,7 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3) {
                               session = session,
                               disabled = T
                             )
-                            #select colums of interest and reformat
+                            #select columns of interest and reformat
                             Data_to_plot$selected_data = scCNV %>%
                               dplyr::mutate(pos = paste0(chr, ':', start, '-', end)) %>%
                               dplyr::filter(basename %in% input$Sample,
@@ -461,14 +458,14 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3) {
                               shiny::renderUI({
                                 shiny::fluidPage(
                                   shinyjs::useShinyjs(),
-                                  title = 'Define Subpopulation',
+                                  title = 'Define Sub population',
                                   width = 12,
                                   height = '100%',
                                   shiny::tags$div(
                                     class = "header",
                                     checked = NA,
                                     shiny::tags$h4(
-                                      "Select your subpopulation on this first plot. Click on two different point to create the first side of you gate and then continue till you are satisfied. Use a double click once you have done and you want to close a gate."
+                                      "Select your sub-population on this first plot. Click on two different point to create the first side of you gate and then continue till you are satisfied. Use a double click once you have done and you want to close a gate."
                                     ),
                                     style = 'padding:30px;'
                                   ),
@@ -528,8 +525,8 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3) {
                                         inputId = ns('AssignGroups_subpop'),
                                         label = 'Assign G to S-phase',
                                         value = F,
-                                        onLabel = 'On',
-                                        offLabel = 'Off',
+                                        onlabel = 'On',
+                                        offlabel = 'Off',
                                         inline = T,
                                         labelWidth = '100%',
                                         disabled = T,
@@ -544,7 +541,7 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3) {
                                   shiny::fluidRow()
                                 )
                               })
-                            #initialise
+                            #initialize
                             output$group_phase_subpop <-
                               shiny::renderTable(NULL)
                             output$plot2_subpop <-
@@ -723,7 +720,7 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3) {
 
                                 }
                               })
-                              # clean selsections
+                              # clean selections
                               shiny::observeEvent(input$Cancel_subpop, {
                                 if (input$Cancel_subpop > 0) {
                                   data_subpop$data$phase = NA
@@ -802,13 +799,13 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3) {
                               })
 
                               shiny::observeEvent(input$AssignGroups_subpop, {
-                                #if assign gorups is on
+                                #if assign groups is on
                                 if (input$AssignGroups_subpop) {
                                   shinyjs::disable('SaveGroups_subpop')
                                   output$SubPopUI2 <-
                                     shiny::renderUI({
                                       shiny::fluidPage(
-                                        title = 'Results Assignment',
+                                        title = 'Results assignment',
                                         width = 12,
                                         height = '100%',
                                         class = "header",

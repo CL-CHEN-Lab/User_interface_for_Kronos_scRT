@@ -13,7 +13,7 @@ Prepare_G1G2_phase_cells_forBinRepProb(
 \arguments{
 \item{G1.G2, }{G1/G2 single cell CNV dataframe}
 
-\item{RT, }{pseudobulk replication timing dataframe}
+\item{RT, }{pseudo bulk replication timing dataframe}
 
 \item{quantile.range, }{Ploidy quantile range to keep a G1/G2 cell}
 }

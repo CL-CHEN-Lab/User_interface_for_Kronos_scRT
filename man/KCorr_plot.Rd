@@ -4,10 +4,33 @@
 \alias{KCorr_plot}
 \title{Customized GGally::ggparis function}
 \usage{
-KCorr_plot(df, method = "spearman")
+KCorr_plot(
+  ...,
+  method = "spearman",
+  density_fill = NULL,
+  correlation_gradient = NULL,
+  correlation_text_color = "red",
+  correlation_text_size = 15,
+  hex_color_palette = c("viridis", "inferno", "magma", "plasma", "cividis"),
+  hex_fill = NULL
+)
 }
 \arguments{
-\item{df, }{a dataframe containing bulk and pseudo-bulk RTs and the following columns:chr, start, end, group, basename, RT}
+\item{..., }{one or multiple dataframes containing bulk and pseudo-bulk RTs and the following columns:chr, start, end, group, basename, RT}
+
+\item{method, }{correlation method}
+
+\item{density_fill, }{diagonal plot fill color}
+
+\item{correlation_gradient, }{min, midpoint and max colors for the upper triangle}
+
+\item{correlation_text_color, }{text color upper triangle correlation}
+
+\item{correlation_text_size, }{text size upper triangle correlation}
+
+\item{hex_color_palette, }{color palette for the lower triangle density gradient}
+
+\item{hex_fill, }{multiple manual colors to used for the lower triangle density gradient, if provided hex_color_palette is ignored}
 }
 \value{
 ggplot element

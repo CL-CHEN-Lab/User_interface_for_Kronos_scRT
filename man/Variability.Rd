@@ -2,18 +2,18 @@
 % Please edit documentation in R/scRT_processing.R
 \name{Variability}
 \alias{Variability}
-\title{prepares varibility file}
+\title{prepares variability file}
 \usage{
 Variability(S_scCN, scRT)
 }
 \arguments{
 \item{S_scCN, }{scCN dataframe from Replication_state function (after filtering,optional)}
 
-\item{scRT, }{pseudobulk-RT dataframe from pseudoBulkRT}
+\item{scRT, }{pseudo-bulk-RT dataframe from pseudoBulkRT}
 }
 \value{
 tibble
 }
 \description{
-prepares varibility file
+prepares variability file
 }

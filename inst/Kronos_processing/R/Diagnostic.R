@@ -1,5 +1,5 @@
 diagnostic_ui <- function(id) {
-  ns <- shiny::NS(paste0('diagnostic', id))
+  ns <- shiny::NS(id)
 
   shinydashboard::box(
     id = ns('box'),
@@ -126,10 +126,11 @@ diagnostic_ui <- function(id) {
 diagnostic_server <-
   function(id,
            PerCell,
+           Sample,
            Setting = tibble(),
            Cores = 3,
            OutFolder = '~/') {
-    shiny::moduleServer(paste0('diagnostic', id),
+    shiny::moduleServer(id,
                         function(input,
                                  output,
                                  session,
@@ -207,7 +208,7 @@ diagnostic_server <-
                                                           selected = 'Manual')
                               }
 
-                              #prepae df
+                              #prepare df
                               R_df$PC_df = R_df$PC_df %>%
                                 dplyr::mutate(
                                   Type = dplyr::case_when(
@@ -220,7 +221,7 @@ diagnostic_server <-
                                   Type = dplyr::case_when(
                                     coverage_per_1Mbp < input$min_n_reads__diagnostic * median_ploidy_not_noisy__diagnostic ~ 'Low Coverage',
                                     ploidy_confidence < 2 &
-                                      ploidy_confidence != -100 ~ 'Low Ployidy confidence',
+                                      ploidy_confidence != -100 ~ 'Low ploidy confidence',
                                     mean_ploidy < median_ploidy_not_noisy__diagnostic / 1.5 ~ 'Too low ploidy compared to G1/G2-phase pool',
                                     mean_ploidy > median_ploidy_not_noisy__diagnostic * 2 ~ 'Too high ploidy compared to G1/G2-phase pool',
                                     T ~ Type
@@ -249,7 +250,7 @@ diagnostic_server <-
                                 ggplot2::scale_color_manual(
                                   values = c(
                                     'Low Coverage' = "#ff7949",
-                                    'Low Ployidy confidence' = "#70001e",
+                                    'Low ploidy confidence' = "#70001e",
                                     'Too low ploidy compared to G1/G2-phase pool' = "#01e7ab",
                                     'Too high ploidy compared to G1/G2-phase pool' = "#a7001b",
                                     'G1/G2-phase cells' = "#005095",
@@ -277,7 +278,7 @@ diagnostic_server <-
                                                                       'G1/G2-phase cells') %>% dplyr::pull(mean_ploidy)
                               )
 
-                              #reassing cells based on new median ploidy
+                              #reassign cells based on new median ploidy
                               R_df$PC_df_subset = R_df$PC_df_subset %>%
                                 dplyr::mutate(
                                   Type = dplyr::case_when(
@@ -364,7 +365,7 @@ diagnostic_server <-
                                   ggplot2::scale_color_manual(
                                     values = c(
                                       'Low Coverage' = "#ff7949",
-                                      'Low Ployidy confidence' = "#70001e",
+                                      'Low ploidy confidence' = "#70001e",
                                       'Too low ploidy compared to G1/G2' = "#01e7ab",
                                       'Too high ploidy compared to G1/G2' = "#a7001b",
                                       'G1/G2-phase cells' = "#005095",
@@ -428,9 +429,9 @@ diagnostic_server <-
 
                                   # are the data unimodal?
                                   if (LaplacesDemon::is.unimodal(x)) {
-                                    # d is the distance betwen theoretical center of the Sphase (G1 median ploidy *1.5)
+                                    # d is the distance between theoretical center of the S phase (G1 median ploidy *1.5)
                                     #and the average ploidy of the corrected S-phase
-                                    # d is devided by sd(x) in order to select parametes that keep the distribution as wide as possible
+                                    # d is divided by sd(x) in order to select parameters that keep the distribution as wide as possible
                                     dplyr::tibble(
                                       A = a,
                                       B = b,
@@ -496,7 +497,7 @@ diagnostic_server <-
                               } else{
                                 output$parameters_text__diagnostic = renderText(
                                   paste(
-                                    'S phase correction parameters have been exstimated.\n',
+                                    'S phase correction parameters have been estimated.\n',
                                     'Parameter first part S phase: ',
                                     R_df$distributions$A,
                                     '\n',
@@ -744,7 +745,7 @@ diagnostic_server <-
                               filename = file.path(out,
                                                    paste0(
                                                      sample,
-                                                     '_S_phase_cell _distribution.pdf'
+                                                     '_S_phase_cell_distribution.pdf'
                                                    )),
                               plot = plots$plot5__diagnostic(),
                               device = grDevices::cairo_pdf

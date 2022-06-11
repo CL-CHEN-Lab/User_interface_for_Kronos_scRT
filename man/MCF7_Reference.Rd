@@ -3,7 +3,7 @@
 \docType{data}
 \name{MCF7_Reference}
 \alias{MCF7_Reference}
-\title{MCF7 Referene RT}
+\title{MCF7 Reference RT}
 \format{
 tibble with 2831095 rows and 4 columns.
 \describe{

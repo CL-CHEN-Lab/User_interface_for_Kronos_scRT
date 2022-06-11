@@ -26,11 +26,17 @@ This package contains 3 shiny apps:
 </p>
     - Calculates scReplication Timing profiles and provides an initial overview of the data
 
-- Kronos.scRT::Post_processing()
+- Kronos.scRT::scRT_tools()
  <p align="center">
-<img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/Post.png">
+<img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/scRTools.png">
 </p>
-    - Provides multiple investigation tools
+    - Provides multiple investigation tools for scRT data
+
+- Kronos.scRT::RT_tools()
+ <p align="center">
+<img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/RTtools.png">
+</p>
+    - Provides multiple investigation tools bulk and pseudo bulk RT data
     
 ### R package analysis workflow
 

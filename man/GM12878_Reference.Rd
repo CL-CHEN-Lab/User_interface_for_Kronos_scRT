@@ -3,7 +3,7 @@
 \docType{data}
 \name{GM12878_Reference}
 \alias{GM12878_Reference}
-\title{GM12878 Referene RT}
+\title{GM12878 Reference RT}
 \format{
 tibble with 2831101 rows and 4 columns.
 \describe{

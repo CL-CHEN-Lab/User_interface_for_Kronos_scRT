@@ -7,13 +7,13 @@
 rejoinSubpop(scCN, scRT, scVariability, subpopulation, RefRT = NULL)
 }
 \arguments{
-\item{scCN, }{Sphase cells scCN dataframe from extractSubpop}
+\item{scCN, }{S-phase cells scCN dataframe from extractSubpop}
 
-\item{scRT, }{pseudobulkRT dataframe from extractSubpop}
+\item{scRT, }{pseudo-bulk-RT dataframe from extractSubpop}
 
 \item{scVariability, }{single cell variability dataframe created by extractSubpop}
 
-\item{subpopulation, }{dataframe containing subpopulation info (Cell,basename,group,subpopulation)}
+\item{subpopulation, }{dataframe containing sub-population info (Cell,basename,group,subpopulation)}
 
 \item{RefRT, }{Reference RT of a group created by extractSubpop}
 }

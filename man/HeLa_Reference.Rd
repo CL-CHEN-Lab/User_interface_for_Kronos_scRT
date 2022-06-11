@@ -3,7 +3,7 @@
 \docType{data}
 \name{HeLa_Reference}
 \alias{HeLa_Reference}
-\title{HeLa S3 Referene RT}
+\title{HeLa S3 Reference RT}
 \format{
 tibble with 2831129 rows and 4 columns.
 \describe{

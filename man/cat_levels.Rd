@@ -2,16 +2,16 @@
 % Please edit documentation in R/Variability_functions.R
 \name{cat_levels}
 \alias{cat_levels}
-\title{Order in which RT categoris should be plot}
+\title{Order in which RT categories should be plot}
 \usage{
 cat_levels(number)
 }
 \arguments{
-\item{number, }{number of categores (2,3 or 5)}
+\item{number, }{number of categories (2,3 or 5)}
 }
 \value{
 character vector
 }
 \description{
-Order in which RT categoris should be plot
+Order in which RT categories should be plot
 }

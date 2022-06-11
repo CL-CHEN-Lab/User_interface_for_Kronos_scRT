@@ -2,7 +2,7 @@
 % Please edit documentation in R/Variability_functions.R
 \name{T25_75}
 \alias{T25_75}
-\title{fit RT data into sigmoidal function and return T25 and T75}
+\title{fit RT data into sigmoid function and return T25 and T75}
 \usage{
 T25_75(df, sample, category)
 }
@@ -17,5 +17,5 @@ T25_75(df, sample, category)
 tibble
 }
 \description{
-fit RT data into sigmoidal function and return T25 and T75
+fit RT data into sigmoid function and return T25 and T75
 }

@@ -43,6 +43,6 @@ A list containing two tibbles variables:
 Jeff_rep2
 }
 \description{
-A \code{list} with two \code{tibble}: PerCell and CNV for Jeff cell repicate 2. Assembly Hg38.
+A \code{list} with two \code{tibble}: PerCell and CNV for Jeff cell replicate 2. Assembly Hg38.
 }
 \keyword{datasets}

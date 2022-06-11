@@ -1,13 +1,20 @@
+#options
+options(
+  stringsAsFactors = FALSE,
+  dplyr.summarise.inform = FALSE,
+  warn = 1,
+  scipen = 999
+)
 #load operator
 `%>%` = tidyr::`%>%`
 #set ggplot theme
 ggplot2::theme_set(new = ggplot2::theme_bw())
 #java function to close this app
 jscode <- "shinyjs.closeWindow = function() { window.close(); }"
-#find max numebr of cores
+#find max number of cores
 maxCores = parallel::detectCores()
 
-# Define UI for application that draws a histogram
+# Define UI
 ui <- shinydashboard::dashboardPage(
   title = 'Kronos scRT',
   skin = 'green',
@@ -21,8 +28,6 @@ ui <- shinydashboard::dashboardPage(
                                tabName = "Home"),
       shinydashboard::menuItem(text = "Dimensionality Reduction",
                                tabName = "DRed"),
-      shinydashboard::menuItem(text = "Correlation",
-                               tabName = "Correlation"),
       shinydashboard::menuItem(text = "scPlots",
                                tabName = "scPlots"),
       shinydashboard::menuItem(text = "scCN",
@@ -102,7 +107,7 @@ ui <- shinydashboard::dashboardPage(
             title = shiny::div(
               'Subgroup file(s)',
               bsplus::shiny_iconlink() %>%
-                bsplus::bs_embed_popover(title = 'Optional file created by the subgroup option in Dimensionality Reduction. Be aware that this option can be used only if there are no differencens in CN between the G1/G2 subpopulations. If this is not the case, cells have to be divided accordingly and reprocessed.' , placement = 'right')
+                bsplus::bs_embed_popover(title = 'Optional file created by the subgroup option in Dimensionality Reduction. Be aware that this option can be used only if there are no differences in CN between the G1/G2 sub populations. If this is not the case, cells have to be divided accordingly and reprocessed.' , placement = 'right')
             ),
             solidHeader = T,
             background = 'black',
@@ -204,7 +209,7 @@ ui <- shinydashboard::dashboardPage(
               width = 3,
               shiny::radioButtons(
                 inputId = 'Regions_tw',
-                choices = c('RT categories', 'Costumized categores'),
+                choices = c('RT categories', 'Customized categories'),
                 label = NULL,
                 inline = T,
                 selected = 'RT categories',
@@ -225,16 +230,7 @@ ui <- shinydashboard::dashboardPage(
                             )
                           )),
             shiny::column(width = 3,
-                          shiny::htmlOutput('GenomeAnnotationFile')),
-            shiny::column(
-              width = 3,
-              shiny::actionButton(
-                inputId =  'run_tw',
-                label = 'Run',
-                width = '100%'
-              )
-            )
-          ),
+                          shiny::htmlOutput('GenomeAnnotationFile'))),
           shiny::uiOutput('TW_ui')
         )
       },
@@ -248,12 +244,13 @@ ui <- shinydashboard::dashboardPage(
                 width = 3,
                 shiny::sliderInput(
                   inputId = 'BinRep_G1_Ploidy',
-                  label = 'G1 Ploidy quantile',
+                  label = 'G1 ploidy quantile',
                   min = 0,
                   max = 1,
                   step = 0.01,
                   dragRange = T,
-                  c(0.25, 0.75)
+                  value = c(0.25, 0.75),
+                  width = '100%'
                 )
               ),
               shiny::column(
@@ -265,8 +262,9 @@ ui <- shinydashboard::dashboardPage(
                   max = 100,
                   step = 1,
                   dragRange = T,
-                  c(0, 30),
-                  post = '%'
+                  value = c(0, 30),
+                  post = '%',
+                  width = '100%'
                 )
               ),
               shiny::column(
@@ -278,8 +276,9 @@ ui <- shinydashboard::dashboardPage(
                   max = 100,
                   step = 1,
                   dragRange = T,
-                  c(40, 60),
-                  post = '%'
+                  value = c(40, 60),
+                  post = '%',
+                  width = '100%'
                 )
               ),
               shiny::column(
@@ -291,27 +290,62 @@ ui <- shinydashboard::dashboardPage(
                   max = 100,
                   step = 1,
                   dragRange = T,
-                  c(70, 100),
-                  post = '%'
+                  value = c(70, 100),
+                  post = '%',
+                  width = '100%'
                 )
               )
             ),
-            shiny::fluidRow(shiny::column(
-              width = 2,
-              shiny::actionButton(
-                inputId = 'Save__BinRep',
-                label = 'Plot',
-                width = '100%'
+            shiny::fluidRow(
+              shiny::column(
+                width = 3,
+                shiny::actionButton(
+                  inputId = 'Save__BinRep',
+                  label = 'Plot',
+                  width = '100%'
+                )
+              ),
+              shiny::column(width = 1,
+                            shinyjs::hidden(
+                              shiny::div(
+                                id = 'Save_group__BinRep',
+                                hw_plot_ui(
+                                  'hw_BinRep',
+                                  right = F,
+                                  up = F,
+                                  height = 7,
+                                  width = 14
+                                )
+                              )
+                            )),
+              shiny::column(
+                offset = 7,
+                width = 1,
+                shinyWidgets::dropdown(
+                  inputId = 'color_dropdown_BinRep',
+                  colors_ui(id = 'ES_color_BinRep', "#a7001b", label = 'Early S cells'),
+                  colors_ui(id = 'MS_color_BinRep', "#dfbd31", label = 'Mid S cells'),
+                  colors_ui(id = 'LS_color_BinRep', "#005095", label = 'Late S cells'),
+                  colors_ui(id = 'GG_color_BinRep', "grey", label = 'G1/G2 cells'),
+                  shiny::fluidRow(
+                    shiny::actionButton(
+                      inputId = 'apply_color_changes_BinRep',
+                      label = 'Apply',
+                      width = '100%'
+                    )
+                  ),
+                  status = 'primary',
+                  inline = T,
+                  icon = icon("palette", lib =
+                                "font-awesome"),
+                  width = 300,
+                  right = T
+                )
               )
-            )),
+            ),
             shiny::uiOutput('BinRep_ui')
           )
         )
-      },
-      #correlation
-      {
-        shinydashboard::tabItem(tabName = "Correlation",
-                                shiny::fluidPage(Correlation_ui('Correlation')))
       },
       #Dred
       {
@@ -327,7 +361,7 @@ ui <- shinydashboard::dashboardPage(
               width = 2,
               shiny::selectInput(
                 inputId = 'Chr__scPlot',
-                label = 'Chrmosome',
+                label = 'Chromosome',
                 choices =  list('Chrom'),
                 selected = 'Chrom',
                 multiple = F,
@@ -339,7 +373,7 @@ ui <- shinydashboard::dashboardPage(
               shiny::sliderInput(
                 width = '100%',
                 inputId = 'range__scPlot',
-                label = 'Coodrinates',
+                label = 'Coordinates',
                 min = 0,
                 max = 0,
                 value = c(0, 0),
@@ -379,7 +413,7 @@ ui <- shinydashboard::dashboardPage(
               width = 2,
               shiny::selectInput(
                 inputId = 'Chr__scCN',
-                label = 'Chrmosome',
+                label = 'Chromosome',
                 choices =  list('Chrom'),
                 selected = 'Chrom',
                 multiple = F,
@@ -391,7 +425,7 @@ ui <- shinydashboard::dashboardPage(
               shiny::sliderInput(
                 width = '100%',
                 inputId = 'range__scCN',
-                label = 'Coodrinates',
+                label = 'Coordinates',
                 min = 0,
                 max = 0,
                 value = c(0, 0),
@@ -438,7 +472,13 @@ server <- function(input, output, session) {
     Save__scCN = F,
     SubgroupFile = dplyr::tibble(),
     Save__BinRep = F,
-    Save__BinRep_label = 'Plot'
+    Save__BinRep_label = 'Plot',
+    colors_BinRep = c(
+      "Early S cells" = '#a7001b',
+      "Late S cells" = '#005095',
+      'Mid S cells' = '#dfbd31',
+      'G1/G2 cells' = 'grey'
+    )
   )
 
   #store scCN module info
@@ -853,10 +893,10 @@ server <- function(input, output, session) {
           G = unique(data$RT$group)
 
           scPlot_module_ls$ui = lapply(G, function(g)
-            scPlots_ui(g))
+            scPlots_ui(paste0('scPlots', g), title = g))
           scPlot_module_ls$server = lapply(G, function(g)
             scPlots_server(
-              g,
+              paste0('scPlots', g),
               RTs = rbind(
                 data$RT %>%
                   dplyr::mutate(basename = group) %>%
@@ -900,27 +940,7 @@ server <- function(input, output, session) {
     )
   }
 
-  ### correlation
-  shiny::observeEvent(input$Sidebar, {
-    if (input$Sidebar == 'Correlation' & nrow(data$RT) != 0) {
-      Corr = Correlation_server(
-        id = 'Correlation',
-        scRT = rbind(
-          data$RT %>%
-            dplyr::mutate(basename = group) %>%
-            dplyr::select(chr, start, end, group, basename, RT),
-          data$Reference %>%
-            dplyr::mutate(group = basename) %>%
-            unique()
-        ),
-        out = file.path(variables$roots['OutputFolder'],
-                        input$Analysis_Name, 'Correlation')
-      )
 
-    } else{
-      Corr = NULL
-    }
-  })
   # #scCN
   {
     shiny::observeEvent(input$Sidebar, {
@@ -968,10 +988,10 @@ server <- function(input, output, session) {
                             G = unique(data$RT$group)
 
                             scCN_module_ls$ui = lapply(G, function(g)
-                              scCN_ui(g))
+                              scCN_ui(paste0('CN', g), title = g))
                             scCN_module_ls$server = lapply(G, function(g)
                               scCN_server(
-                                g,
+                                paste0('CN', g),
                                 S_Traks = data$S %>%
                                   dplyr::filter(
                                     group == g,
@@ -1041,17 +1061,33 @@ server <- function(input, output, session) {
           variables$Save__BinRep_label = 'Plot'
           shiny::updateActionButton(inputId = 'Save__BinRep',
                                     label = variables$Save__BinRep_label)
+          shinyjs::hide('Save_group__BinRep')
         }
 
       }
     })
 
+    #recover binrep colors
+    shiny::observeEvent(input$apply_color_changes_BinRep, {
+      #recover colors
+      ES_color_BinRep = colors_server(id = 'ES_color_BinRep')
+      MS_color_BinRep = colors_server(id = 'MS_color_BinRep')
+      LS_color_BinRep = colors_server(id = 'LS_color_BinRep')
+      GG_color_BinRep = colors_server(id = 'GG_color_BinRep')
+
+      variables$colors_BinRep = c(ES_color_BinRep(),
+                                  MS_color_BinRep(),
+                                  LS_color_BinRep(),
+                                  GG_color_BinRep())
+    })
+
+
     shiny::observeEvent(input$Save__BinRep, {
       if (input$Save__BinRep > 0) {
-        if (variables$Save__BinRep_label == 'Plot') {
-          #avoid user clicking twice
-          shinyjs::disable('Save__BinRep')
+        #avoid user clicking twice
+        shinyjs::disable('Save__BinRep')
 
+        if (variables$Save__BinRep_label == 'Plot') {
           #calculate variability for G1/G2- and S- phase cells
           data$variabilityBR = rbind(
             Kronos.scRT::Prepare_G1G2_phase_cells_forBinRepProb(
@@ -1067,34 +1103,74 @@ server <- function(input, output, session) {
               Late.cells = input$BinRep_Late_Cells
             )
           )
-          # how many windos
-          Groups = unique(data$variabilityBR$group)
-          #call modules
-          BinRep_module_ls$ui = lapply(Groups, function(x)
-            BinRepProb_ui(x))
+          #change label
+          variables$Save__BinRep_label = 'Save'
+          shiny::updateActionButton(inputId = 'Save__BinRep',
+                                    label = variables$Save__BinRep_label)
+          shinyjs::show('Save_group__BinRep')
+        } else{
+          variables$Save__BinRep = T
+          if (!dir.exists(file.path(
+            variables$roots['OutputFolder'],
+            input$Analysis_Name,
+            'BinsRepProb'
+          ))) {
+            dir.create(file.path(
+              variables$roots['OutputFolder'],
+              input$Analysis_Name,
+              'BinsRepProb'
+            ))
+          }
+        }
+        # how many windows
+        Groups = unique(data$variabilityBR$group)
+        #call modules
+        BinRep_module_ls$ui = lapply(Groups, function(x)
+          BinRepProb_ui(paste0('BinRepProb', x), title = x))
+
+        sizes=hw_plot_server('hw_BinRep')
+        sizes=sizes()
+
+        if (variables$Save__BinRep) {
+          variables$Save__BinRep = F
           BinRep_module_ls$server = lapply(Groups, function(x)
             BinRepProb_server(
-              x,
+              id = paste0('BinRepProb', x),
               variabilityBR = data$variabilityBR,
               out = file.path(
                 variables$roots['OutputFolder'],
                 input$Analysis_Name,
                 'BinsRepProb'
               ) ,
-              save = variables$Save__BinRep
+              colors = variables$colors_BinRep,
+              sizes = sizes,
+              file_name = x,
+              save = T
             ))
-          output$BinRep_ui <- shiny::renderUI(BinRep_module_ls$ui)
 
-          if (variables$Save__BinRep) {
-            variables$Save__BinRep = F
-          }
-          #change label
-          variables$Save__BinRep_label = 'Save'
-          shiny::updateActionButton(inputId = 'Save__BinRep',
-                                    label = variables$Save__BinRep_label)
         } else{
-          variables$Save__BinRep = T
+          BinRep_module_ls$server = lapply(Groups, function(x)
+            BinRepProb_server(
+              id = paste0('BinRepProb', x),
+              variabilityBR = data$variabilityBR,
+              out = file.path(
+                variables$roots['OutputFolder'],
+                input$Analysis_Name,
+                'BinsRepProb'
+              ) ,
+              colors = variables$colors_BinRep,
+              sizes = sizes,
+              file_name = x,
+              save = F
+            ))
         }
+        output$BinRep_ui <- shiny::renderUI(BinRep_module_ls$ui)
+
+
+
+        shinyjs::enable('Save__BinRep')
+
+
       }
     })
 
@@ -1103,12 +1179,15 @@ server <- function(input, output, session) {
         input$BinRep_G1_Ploidy,
         input$BinRep_Early_Cells,
         input$BinRep_Mid_Cells,
-        input$BinRep_Late_Cells
+        input$BinRep_Late_Cells,
+        input$apply_color_changes_BinRep
       ),
       {
         variables$Save__BinRep_label = 'Plot'
         shiny::updateActionButton(inputId = 'Save__BinRep',
                                   label = variables$Save__BinRep_label)
+        shinyjs::hide('Save_group__BinRep')
+
       }
     )
 
@@ -1116,12 +1195,10 @@ server <- function(input, output, session) {
   ### Twidth
   {
     shiny::observeEvent(input$Regions_tw, {
-      if (input$Regions_tw == 'Costumized categores') {
+      if (input$Regions_tw == 'Customized categories') {
         shinyjs::show('div_load_regions_tw')
-        shinyjs::disable('run_tw')
       } else{
         shinyjs::hide('div_load_regions_tw')
-        shinyjs::enable('run_tw')
         data$GenomeAnnotationFile = dplyr::tibble()
         output$GenomeAnnotationFile = shiny::renderText({
           NULL
@@ -1171,25 +1248,19 @@ server <- function(input, output, session) {
         if (input$Regions_tw == 'Costumized categores' &
             nrow(data$GenomeAnnotationFile) > 0) {
           if (data$GenomeAnnotationFile$State == 'Wrong Format!') {
-            shinyjs::disable('run_tw')
-          } else{
-            shinyjs::enable('run_tw')
           }
         } else if (input$Regions_tw == 'Costumized categores' &
                    nrow(data$GenomeAnnotationFile) == 0) {
-          shinyjs::disable('run_tw')
 
         } else if (input$Regions_tw != 'Costumized categores') {
-          shinyjs::enable('run_tw')
 
         }
       }
     })
 
-    shiny::observeEvent(input$run_tw, {
+    shiny::observeEvent(input$Sidebar, {
       #if right format upload file
-      if (input$run_tw > 0) {
-        shinyjs::disable('run_tw')
+      if (nrow(data$Variability) > 0 & input$Sidebar == 'Twidth') {
 
         if (nrow(data$GenomeAnnotationFile) > 0) {
           data$GenomeAnnotation_TW = readr::read_tsv(data$GenomeAnnotationFile$datapath)
@@ -1198,19 +1269,19 @@ server <- function(input, output, session) {
         }
 
         Twidth_module_ls$ui = lapply(unique(data$Variability$group), function(x)
-          Twidth_ui(x))
+          Twidth_ui(paste0('Twidth', x), title = x))
         output$TW_ui <- shiny::renderUI(Twidth_module_ls$ui)
 
         Twidth_module_ls$server = lapply(unique(data$Variability$group), function(x)
           Twidth_server(
-            id = x,
+            id = paste0('Twidth', x),
+            file_name = x,
             variability = data$Variability %>% dplyr::filter(group == x),
             out = file.path(variables$roots['OutputFolder'],
                             input$Analysis_Name, 'Twidth'),
             GenomeAnnotation = shiny::isolate(data$GenomeAnnotation_TW),
             cores = input$cores
           ))
-        shinyjs::enable('run_tw')
       }
     })
   }

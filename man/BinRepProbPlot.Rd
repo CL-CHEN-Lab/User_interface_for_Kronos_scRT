@@ -8,17 +8,20 @@ BinRepProbPlot(
   Variability,
   upper_range = c(0.95, 1),
   lower_range = c(0, 0.05),
-  relative_heights = c(1, 2, 1)
+  relative_heights = c(1, 2, 1),
+  colors = NULL
 )
 }
 \arguments{
 \item{Variability, }{a row bind combination of dataframes produce by Prepare_G1G2_phase_cells_forBinRepProb and Prepare_S_phase_cells_forBinRepProb or ether of the 2}
 
-\item{upper_range, }{limits of the upper pannel}
+\item{upper_range, }{limits of the upper panel}
 
-\item{lower_range, }{limits of the upper pannel}
+\item{lower_range, }{limits of the upper panel}
 
-\item{relative_heights, }{relative heights between the 3 pannels}
+\item{relative_heights, }{relative heights between the 3 panels}
+
+\item{colors, }{boxplot fill colors to pass to ggplot}
 }
 \description{
 Bin Replication probability plot

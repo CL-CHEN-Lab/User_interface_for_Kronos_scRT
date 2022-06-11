@@ -29,7 +29,7 @@ FastqToBam(
 
 \item{trim, }{logical value, if False reads won't be trimmed}
 
-\item{phred33, }{logival value, if False phred64 wil be used}
+\item{phred33, }{logical value, if False phred64 will be used}
 }
 \description{
 Trims and maps reads based on Rbowtie2

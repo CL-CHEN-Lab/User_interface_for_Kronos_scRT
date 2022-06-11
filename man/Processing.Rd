@@ -2,7 +2,7 @@
 % Please edit documentation in R/launch.R
 \name{Processing}
 \alias{Processing}
-\title{Launch Kronos scRT}
+\title{Launch Kronos scRT processing}
 \usage{
 Processing()
 }
@@ -10,5 +10,5 @@ Processing()
 Launches the shiny application
 }
 \description{
-Main function to launch Kronos scRT in your browser.
+Main function to launch Kronos scRT processing in your browser.
 }

@@ -1,9 +1,9 @@
-scPlots_ui <- function(id) {
-  ns <- shiny::NS(paste0('scPlots', id))
+scPlots_ui <- function(id,title=NULL) {
+  ns <- shiny::NS(id)
   shinydashboard::box(
     id = ns('box'),
     status = 'primary',
-    title = id,
+    title = title,
     width = 12,
     solidHeader = T,
     collapsible = T,
@@ -20,7 +20,7 @@ scPlots_server <-
            Extreme_values,
            out,
            save) {
-    shiny::moduleServer(paste0('scPlots', id),
+    shiny::moduleServer(id,
                         function(input,
                                  output,
                                  session,
@@ -30,11 +30,11 @@ scPlots_server <-
                                  extremes = Extreme_values,
                                  Out = out,
                                  Save = save,
-                                 ID=paste0('scPlots', id)) {
+                                 ID=id) {
                           #load required operators
                           `%>%` = tidyr::`%>%`
                           if (nrow(scTracks) != 0) {
-                            #depending on selection change aestetics of the plot
+                            #depending on selection change aesthetics of the plot
                             if (what == 'scRT') {
                               scTracks = scTracks %>%
                                 dplyr::rename(Value = Rep) %>%

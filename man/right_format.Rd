@@ -2,14 +2,14 @@
 % Please edit documentation in R/right_format.R
 \name{right_format}
 \alias{right_format}
-\title{checks whether a file contains the right number of columns and/or the right colums names}
+\title{checks whether a file contains the right number of columns and/or the right column names}
 \usage{
 right_format(
   file_path,
   columns_to_check,
   delim = "\\t",
   skip = 0,
-  wrong_message = "does not have the proper format",
+  wrong_message = "does not have the proper format \\n",
   rigth_message = "",
   logical = F
 )
@@ -17,7 +17,7 @@ right_format(
 \arguments{
 \item{file_path, }{path to a file of interest}
 
-\item{columns_to_check, }{either a list of columns name or the number of colums that are supposed to be in the file}
+\item{columns_to_check, }{either a list of columns name or the number of columns that are supposed to be in the file}
 
 \item{delim, }{delimiter for read_delim}
 
@@ -31,5 +31,5 @@ right_format(
 a string informing the user whether a file format is the required one
 }
 \description{
-checks whether a file contains the right number of columns and/or the right colums names
+checks whether a file contains the right number of columns and/or the right column names
 }
