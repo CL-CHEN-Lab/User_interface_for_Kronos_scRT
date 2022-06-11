@@ -28,7 +28,7 @@ This package contains 3 shiny apps:
 
 - Kronos.scRT::scRT_tools()
  <p align="center">
-<img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/scRTools.png">
+<img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/scRTtools.png">
 </p>
     - Provides multiple investigation tools for scRT data
 
