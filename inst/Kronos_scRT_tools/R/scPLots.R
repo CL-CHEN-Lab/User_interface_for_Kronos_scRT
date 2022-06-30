@@ -19,6 +19,7 @@ scPlots_server <-
            filling,
            Extreme_values,
            out,
+           colors,
            save) {
     shiny::moduleServer(id,
                         function(input,
@@ -30,9 +31,16 @@ scPlots_server <-
                                  extremes = Extreme_values,
                                  Out = out,
                                  Save = save,
+                                 col=colors,
                                  ID=id) {
                           #load required operators
                           `%>%` = tidyr::`%>%`
+
+                          #recover colors
+                          Colors=col$color
+                          names(Colors)=col$basename
+
+
                           if (nrow(scTracks) != 0) {
                             #depending on selection change aesthetics of the plot
                             if (what == 'scRT') {
@@ -141,8 +149,7 @@ scPlots_server <-
                                                                              2)
 
                               ) + ggplot2::xlab(Chr) +
-                              ggplot2::scale_color_manual(values = c("#0262b5",
-                                                                     "#f15bba"))+
+                              ggplot2::scale_color_manual(values = Colors)+
                               ggplot2::theme(aspect.ratio = 2)
 
 
