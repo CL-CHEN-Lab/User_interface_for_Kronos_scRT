@@ -196,7 +196,38 @@ ui <- shinydashboard::dashboardPage(
                 'Apply settings',
               width = '100%'
             )
-          )
+          ),
+          shinyjs::hidden(shiny::div(id = 'color_option_div',
+                                     shiny::fluidRow(
+                                       column(
+                                         width = 6,
+                                         offset = 3,
+                                         shinydashboard::box(
+                                           width = 12,
+                                           title = 'Color Options',
+                                           solidHeader = T,
+                                           background = 'black',
+                                           collapsible = T,
+                                           collapsed = F,
+                                           align = 'left',
+                                           shiny::fluidRow(
+                                             shiny::column(width = 10, shiny::h4('Group - Basename')),
+                                             shiny::column(width = 2, shiny::h4('Color'))
+                                           ),
+                                           shiny::uiOutput('General_color'),
+                                           shiny::fluidRow(shiny::column(
+                                             width = 4,
+                                             offset = 4,
+                                             shiny::actionButton(
+                                               inputId =  'ApplySettingsColors',
+                                               label =
+                                                 'Apply color settings',
+                                               width = '100%'
+                                             )
+                                           ))
+                                         )
+                                       )
+                                     )))
         )
 
       },
@@ -230,7 +261,8 @@ ui <- shinydashboard::dashboardPage(
                             )
                           )),
             shiny::column(width = 3,
-                          shiny::htmlOutput('GenomeAnnotationFile'))),
+                          shiny::htmlOutput('GenomeAnnotationFile'))
+          ),
           shiny::uiOutput('TW_ui')
         )
       },
@@ -369,7 +401,7 @@ ui <- shinydashboard::dashboardPage(
               )
             ),
             shiny::column(
-              width = 5,
+              width = 7,
               shiny::sliderInput(
                 width = '100%',
                 inputId = 'range__scPlot',
@@ -391,15 +423,46 @@ ui <- shinydashboard::dashboardPage(
                 inline = T,
                 width = '100%'
               )
-            ),
+            )
+          ),
+          shiny::fluidRow(
             shiny::column(
-              width = 2,
+              width = 3,
               shiny::actionButton(
                 inputId = 'Save__scPlot',
-                label = 'Save',
+                label = 'Plot',
                 width = '100%'
               )
+            ),
+            shiny::column(width = 1,
+                          hw_plot_ui(
+                            'HW_scPlot',
+                            up = F,
+                            height = 15,
+                            width = 10
+                          )),
+            shiny::column(
+              offset = 6,
+              width = 1,
+              shinyWidgets::dropdown(
+                inputId = 'color_dropdown_scPlot',
+                shiny::uiOutput('Color_UI_scPlot'),
+                shiny::fluidRow(
+                  shiny::actionButton(
+                    inputId = 'apply_color_changes_scPlot',
+                    label = 'Apply',
+                    width = '100%'
+                  )
+                ),
+                status = 'primary',
+                inline = T,
+                icon = icon("palette", lib =
+                              "font-awesome"),
+                width = 300,
+                right = T
+              )
             )
+
           ),
           shiny::uiOutput('scPlots_UI')
         )
@@ -717,7 +780,10 @@ server <- function(input, output, session) {
 
           rm('temp_variable')
           rm('temp_subpop')
+
         }
+
+
 
         #data output
         output$SubgroupFile_out = shiny::renderTable({
@@ -820,7 +886,69 @@ server <- function(input, output, session) {
 
           rm('temp_variable')
         }
+
+        data$samples_names_and_colors =rbind(data$RT %>%
+            dplyr::mutate(basename = group) %>%
+            dplyr::select(group, basename) %>%
+            unique() %>%
+            dplyr::mutate(
+              type = 'Sample',
+              id = paste(group, basename, sep = ' - ')
+            ),data$Reference %>%
+            dplyr::select(group, basename) %>%
+            unique() %>%
+            dplyr::mutate(
+              type = 'Reference',
+              id = paste(group, basename, sep = ' - ')
+            ))
+
+
+        if (nrow(data$samples_names_and_colors%>%dplyr::filter(type == 'Sample')) <= 6) {
+          Paired_colors = RColorBrewer::brewer.pal(name = 'Paired', n = 12)
+        } else{
+          Paired_colors = grDevices::colorRampPalette(RColorBrewer::brewer.pal(name = 'Set1', n =
+                                                                                 8))(nrow(data$samples_names_and_colors) * 2)
+        }
+
+        Sequence = seq(2, nrow(data$samples_names_and_colors) * 2, 2)
+        Paired_colors = lapply(1:nrow(data$samples_names_and_colors%>%dplyr::filter(type == 'Sample')), function(x)
+          dplyr::tibble(
+            group = data$samples_names_and_colors$group[x],
+            Sample = Paired_colors[Sequence[x]],
+            Reference = Paired_colors[Sequence[x] - 1]
+          ))
+        Paired_colors = do.call('rbind', Paired_colors)
+        Paired_colors=Paired_colors%>%tidyr::gather(type,color,-group)
+
+
+        data$samples_names_and_colors=data$samples_names_and_colors%>%dplyr::inner_join(Paired_colors)
+
+        #color options
+        output$General_color = shiny::renderUI({
+          lapply(1:nrow(data$samples_names_and_colors), function(x)
+            colors_ui(
+              id = data$samples_names_and_colors$id[x],
+              data$samples_names_and_colors$color[x],
+              data$samples_names_and_colors$id[x]
+            ))
+        })
+
+
+        shinyjs::show('color_option_div')
+
       }
+    })
+
+    #apply color options
+    shiny::observeEvent(input$ApplySettingsColors,{
+
+      General_colrs=lapply(1:nrow(data$samples_names_and_colors), function(x)
+        colors_server(
+          id = data$samples_names_and_colors$id[x]
+        ))
+      General_colrs=sapply(General_colrs, function(x) x())
+      data$samples_names_and_colors$color=General_colrs
+
     })
 
     shiny::observeEvent(input$Output_dir, {
@@ -847,6 +975,8 @@ server <- function(input, output, session) {
           dplyr::ungroup() %>%
           dplyr::summarise(CN_bg = round(stats::quantile(CN_bg, c(0.01, 0.99)), 1),
                            CN = round(stats::quantile(CN, c(0.01, 0.99)), 1))
+
+
       }
 
     })
@@ -880,64 +1010,66 @@ server <- function(input, output, session) {
 
       variables$Save__scPlot = T
     })
+
+
     #reset all if something changes
-    shiny::observeEvent(
-      c(
-        input$range__scPlot,
-        input$what__scPlot,
-        input$what__scPlot,
-        input$Save__scPlot
-      ),
-      {
-        if (nrow(data$RT) > 0) {
-          G = unique(data$RT$group)
+    shiny::observeEvent(c(
+      input$range__scPlot,
+      input$what__scPlot,
+      input$Save__scPlot
+    ),
+    {
+      if (nrow(data$RT) > 0) {
+        G = unique(data$RT$group)
 
-          scPlot_module_ls$ui = lapply(G, function(g)
-            scPlots_ui(paste0('scPlots', g), title = g))
-          scPlot_module_ls$server = lapply(G, function(g)
-            scPlots_server(
-              paste0('scPlots', g),
-              RTs = rbind(
-                data$RT %>%
-                  dplyr::mutate(basename = group) %>%
-                  dplyr::select(chr, start, end, group, basename, RT),
-                data$Reference
-              ) %>%
-                dplyr::filter(
-                  group == g,
-                  chr == input$Chr__scPlot,
-                  start > input$range__scPlot[1] *
-                    10 ^ 6,
-                  end < input$range__scPlot[2] *
-                    10 ^ 6
-                ),
-              scCN = data$S %>%
-                dplyr::filter(
-                  group == g,
-                  chr == input$Chr__scPlot,
-                  start >= input$range__scPlot[1] *
-                    10 ^ 6,
-                  end <= input$range__scPlot[2] *
-                    10 ^ 6
-                ),
-              filling = input$what__scPlot,
-              Extreme_values = data$summary,
-              out = file.path(variables$roots['OutputFolder'],
-                              input$Analysis_Name, 'scPlots'),
-              save = variables$Save__scPlot
+        scPlot_module_ls$ui = lapply(G, function(g)
+          scPlots_ui(paste0('scPlots', g), title = g))
+        scPlot_module_ls$server = lapply(G, function(g)
+          scPlots_server(
+            paste0('scPlots', g),
+            RTs = rbind(
+              data$RT %>%
+                dplyr::mutate(basename = group) %>%
+                dplyr::select(chr, start, end, group, basename, RT),
+              data$Reference
+            ) %>%
+              dplyr::filter(
+                group == g,
+                chr == input$Chr__scPlot,
+                start > input$range__scPlot[1] *
+                  10 ^ 6,
+                end < input$range__scPlot[2] *
+                  10 ^ 6
+              ),
+            scCN = data$S %>%
+              dplyr::filter(
+                group == g,
+                chr == input$Chr__scPlot,
+                start >= input$range__scPlot[1] *
+                  10 ^ 6,
+                end <= input$range__scPlot[2] *
+                  10 ^ 6
+              ),
+            filling = input$what__scPlot,
+            Extreme_values = data$summary,
+            out = file.path(variables$roots['OutputFolder'],
+                            input$Analysis_Name, 'scPlots'),
+            colors=data$samples_names_and_colors%>%
+              dplyr::filter(
+                group == g),
+            save = variables$Save__scPlot
 
-            ))
+          ))
 
-          if (variables$Save__scPlot) {
-            variables$Save__scPlot = F
-          }
-
-          output$scPlots_UI = shiny::renderUI({
-            scPlot_module_ls$ui
-          })
+        if (variables$Save__scPlot) {
+          variables$Save__scPlot = F
         }
+
+        output$scPlots_UI = shiny::renderUI({
+          scPlot_module_ls$ui
+        })
       }
-    )
+    })
   }
 
 
@@ -1026,6 +1158,7 @@ server <- function(input, output, session) {
                           }
                         })
   }
+
   # # Dimensionality reduction
   shiny::observeEvent(input$Sidebar, {
     if (input$Sidebar == 'DRed' & ncol(data$G) != 0) {
@@ -1039,7 +1172,10 @@ server <- function(input, output, session) {
         out =  file.path(variables$roots['OutputFolder'],
                          input$Analysis_Name),
         Inputfolder = data$folder_list,
-        cores = input$cores
+        cores = input$cores,
+        colors=data$samples_names_and_colors%>%
+          dplyr::filter(
+            type == 'Sample')
       )
 
     } else {
@@ -1128,8 +1264,8 @@ server <- function(input, output, session) {
         BinRep_module_ls$ui = lapply(Groups, function(x)
           BinRepProb_ui(paste0('BinRepProb', x), title = x))
 
-        sizes=hw_plot_server('hw_BinRep')
-        sizes=sizes()
+        sizes = hw_plot_server('hw_BinRep')
+        sizes = sizes()
 
         if (variables$Save__BinRep) {
           variables$Save__BinRep = F
@@ -1248,6 +1384,7 @@ server <- function(input, output, session) {
         if (input$Regions_tw == 'Costumized categores' &
             nrow(data$GenomeAnnotationFile) > 0) {
           if (data$GenomeAnnotationFile$State == 'Wrong Format!') {
+
           }
         } else if (input$Regions_tw == 'Costumized categores' &
                    nrow(data$GenomeAnnotationFile) == 0) {
@@ -1261,7 +1398,6 @@ server <- function(input, output, session) {
     shiny::observeEvent(input$Sidebar, {
       #if right format upload file
       if (nrow(data$Variability) > 0 & input$Sidebar == 'Twidth') {
-
         if (nrow(data$GenomeAnnotationFile) > 0) {
           data$GenomeAnnotation_TW = readr::read_tsv(data$GenomeAnnotationFile$datapath)
         } else{
