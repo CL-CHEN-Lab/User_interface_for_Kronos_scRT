@@ -68,24 +68,14 @@ Dim_red_sub_pop_ui = function(id) {
       )
     ),
     shiny::fluidRow(align = 'center',
-                    shiny::plotOutput(ns('dred_out'), width = '100%',height = 'auto')),
+                    shiny::plotOutput(ns('dred_out'))),
     shiny::fluidRow(
       shiny::column(
         width = 3,
         shiny::radioButtons(
           inputId = ns('color'),
           label = 'Color',
-          choices = c('Group', 'Sample', '%Rep'),
-          width = '100%',
-          inline = T
-        )
-      ),
-      shiny::column(
-        width = 3,
-        shiny::radioButtons(
-          inputId = ns('shape'),
-          label = 'Shape',
-          choices = c('Group', 'Sample'),
+          choices = c('Sample', '%Rep'),
           width = '100%',
           inline = T
         )
@@ -131,7 +121,7 @@ Dim_red_sub_pop_ui = function(id) {
 }
 
 
-Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3) {
+Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3,colors) {
   shiny::moduleServer(id,
                       function(input,
                                output,
@@ -139,9 +129,14 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3) {
                                scCNV = scCN,
                                Cores = cores,
                                Out = out,
+                               col=colors,
                                IN = Inputfolder) {
                         #load required operators
                         `%>%` = tidyr::`%>%`
+
+                        #recover colors
+                        Colors=col$color
+                        names(Colors)=col$basename
 
                         #initialize
                         Data_to_plot = reactiveValues(
@@ -289,33 +284,27 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3) {
                             shinyWidgets::updateSwitchInput(inputId = 'start_subpop', disabled = F)
                           }
 
-                          shiny::observeEvent(c(Data_to_plot$scCNV, input$color, input$shape), {
+                          shiny::observeEvent(c(Data_to_plot$scCNV, input$color), {
                             #plot
                             Data_to_plot$plot = Data_to_plot$scCNV %>%
                               dplyr::select(
                                 'x',
                                 'y',
                                 'color' = dplyr::case_when(
-                                  input$color == 'Group' ~ 'group',
                                   input$color == 'Sample' ~ 'basename',
                                   input$color == '%Rep' ~ 'PercentageReplication'
-                                ),
-                                'shape' = dplyr::case_when(
-                                  input$shape == 'Group' ~ 'group',
-                                  input$shape == 'Sample' ~ 'basename'
                                 )
                               ) %>%
                               ggplot2::ggplot() +
                               ggplot2::geom_point(
-                                ggplot2::aes(x, y, color = color, shape = shape),
+                                ggplot2::aes(x, y, color = color),
                                 alpha = 0.4,
                                 size = 2
                               ) +
                               ggplot2::labs(
                                 x = paste(input$setting, '1', sep = '-'),
                                 y = paste(input$setting, '2', sep = '-'),
-                                color = input$color,
-                                shape = input$shape
+                                color = input$color
                               ) + ggplot2::theme(aspect.ratio = 0.5)
 
                             if (input$color == '%Rep') {
@@ -327,6 +316,9 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3) {
                                   lim = c(0, 1),
                                   midpoint = 0.5
                                 )
+                            }else{
+                              Data_to_plot$plot = Data_to_plot$plot +
+                                ggplot2::scale_color_manual(values = Colors)
                             }
 
                             output$dred_out = shiny::renderPlot(Data_to_plot$plot)
@@ -366,8 +358,6 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3) {
                                 '_phase',
                                 '_color_',
                                 ifelse(input$color == '%Rep', 'RepPerc', input$color),
-                                '_shape_',
-                                input$shape,
                                 '.pdf'
                               )
                             )
@@ -525,8 +515,6 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3) {
                                         inputId = ns('AssignGroups_subpop'),
                                         label = 'Assign G to S-phase',
                                         value = F,
-                                        onlabel = 'On',
-                                        offlabel = 'Off',
                                         inline = T,
                                         labelWidth = '100%',
                                         disabled = T,
