@@ -441,7 +441,7 @@ server <- function(input, output, session) {
 
       #set UI
       Samples_colors_group_plot$ui = lapply(1:length(varialbes$colors), function(x)
-        groupped_plots_colors_ui(
+        grouped_plots_colors_ui(
           id = names(varialbes$colors)[x],
           color = varialbes$colors[x]
         ))
@@ -452,7 +452,7 @@ server <- function(input, output, session) {
 
       #recover output server
       Samples_colors_group_plot$server = lapply(1:length(varialbes$colors), function(x)
-        groupped_plots_colors_server(id = names(varialbes$colors)[x]))
+        grouped_plots_colors_server(id = names(varialbes$colors)[x]))
 
       shiny::observeEvent(input$Samples_colors_group_apply_change, {
         Samples_colors_group_plot$results = lapply(Samples_colors_group_plot$server, function(x)

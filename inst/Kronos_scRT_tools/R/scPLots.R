@@ -7,7 +7,7 @@ scPlots_ui <- function(id,title=NULL) {
     width = 12,
     solidHeader = T,
     collapsible = T,
-    shiny::fluidRow(plotOutput(ns('plot__scPlot'), width = '100%',height = '100%'))
+    shiny::fluidRow(plotOutput(ns('plot__scPlot'), width = '60%',height = 'auto'),align='center')
   )
 }
 
@@ -20,6 +20,7 @@ scPlots_server <-
            Extreme_values,
            out,
            colors,
+           size_plot,
            save) {
     shiny::moduleServer(id,
                         function(input,
@@ -32,6 +33,7 @@ scPlots_server <-
                                  Out = out,
                                  Save = save,
                                  col=colors,
+                                 plot_size=size_plot,
                                  ID=id) {
                           #load required operators
                           `%>%` = tidyr::`%>%`
@@ -39,7 +41,6 @@ scPlots_server <-
                           #recover colors
                           Colors=col$color
                           names(Colors)=col$basename
-
 
                           if (nrow(scTracks) != 0) {
                             #depending on selection change aesthetics of the plot
@@ -149,8 +150,7 @@ scPlots_server <-
                                                                              2)
 
                               ) + ggplot2::xlab(Chr) +
-                              ggplot2::scale_color_manual(values = Colors)+
-                              ggplot2::theme(aspect.ratio = 2)
+                              ggplot2::scale_color_manual(values = Colors)
 
 
                           } else{
@@ -173,7 +173,10 @@ scPlots_server <-
                                 Out,
                                 paste0(group, '_', Chr, '_', start, 'Mb_', end, 'Mb.pdf')
                               ),
-                              device = grDevices::cairo_pdf
+                              device = grDevices::cairo_pdf,
+                              width = plot_size$width,
+                              height = plot_size$height,
+                              units = plot_size$unit
                             )
                           }
                           #render plot
@@ -181,7 +184,7 @@ scPlots_server <-
                             plot
                           },
                           height = function() {
-                            session$clientData[[paste0('output_', ID, '-plot__scPlot_width')]]*1.5
+                            session$clientData[[paste0('output_', ID, '-plot__scPlot_width')]]* plot_size$height / plot_size$width
                           })
                         })
 

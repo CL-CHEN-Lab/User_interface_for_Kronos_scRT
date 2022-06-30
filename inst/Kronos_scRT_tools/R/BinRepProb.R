@@ -12,7 +12,7 @@ BinRepProb_ui = function(id,title=NULL) {
   )
 }
 
-BinRepProb_server = function(id, variabilityBR, out, colors, sizes, save,file_name) {
+BinRepProb_server = function(id, variabilityBR, out, colors, size, save,file_name) {
   shiny::moduleServer(id,
                       function(input,
                                output,
@@ -20,7 +20,7 @@ BinRepProb_server = function(id, variabilityBR, out, colors, sizes, save,file_na
                                VarBR = variabilityBR,
                                Save = save,
                                Colors = colors,
-                               plot_sizes = sizes,
+                               plot_size = size,
                                Out = out,
                                basename=file_name) {
                         shiny::observe({
@@ -32,7 +32,7 @@ BinRepProb_server = function(id, variabilityBR, out, colors, sizes, save,file_na
                             q
                           },
                           height = function() {
-                            session$clientData[[paste0('output_', id, '-plot_width')]] * plot_sizes$height / plot_sizes$width
+                            session$clientData[[paste0('output_', id, '-plot_width')]] * plot_size$height / plot_size$width
                           })
 
                           if (Save) {
@@ -44,9 +44,9 @@ BinRepProb_server = function(id, variabilityBR, out, colors, sizes, save,file_na
                               filename = file.path(Out,
                                                    paste0(basename, '_BinRepProb.pdf')),
                               device = grDevices::cairo_pdf,
-                              width = plot_sizes$width,
-                              height = plot_sizes$height,
-                              units = plot_sizes$unit
+                              width = plot_size$width,
+                              height = plot_size$height,
+                              units = plot_size$unit
                             )
                           }
                         })

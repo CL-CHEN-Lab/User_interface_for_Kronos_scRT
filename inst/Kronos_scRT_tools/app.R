@@ -204,11 +204,9 @@ ui <- shinydashboard::dashboardPage(
                                          offset = 3,
                                          shinydashboard::box(
                                            width = 12,
-                                           title = 'Color Options',
+                                           title = 'General color Options',
                                            solidHeader = T,
                                            background = 'black',
-                                           collapsible = T,
-                                           collapsed = F,
                                            align = 'left',
                                            shiny::fluidRow(
                                              shiny::column(width = 10, shiny::h4('Group - Basename')),
@@ -430,7 +428,7 @@ ui <- shinydashboard::dashboardPage(
               width = 3,
               shiny::actionButton(
                 inputId = 'Save__scPlot',
-                label = 'Plot',
+                label = 'Save',
                 width = '100%'
               )
             ),
@@ -440,29 +438,7 @@ ui <- shinydashboard::dashboardPage(
                             up = F,
                             height = 15,
                             width = 10
-                          )),
-            shiny::column(
-              offset = 6,
-              width = 1,
-              shinyWidgets::dropdown(
-                inputId = 'color_dropdown_scPlot',
-                shiny::uiOutput('Color_UI_scPlot'),
-                shiny::fluidRow(
-                  shiny::actionButton(
-                    inputId = 'apply_color_changes_scPlot',
-                    label = 'Apply',
-                    width = '100%'
-                  )
-                ),
-                status = 'primary',
-                inline = T,
-                icon = icon("palette", lib =
-                              "font-awesome"),
-                width = 300,
-                right = T
-              )
-            )
-
+                          ))
           ),
           shiny::uiOutput('scPlots_UI')
         )
@@ -473,7 +449,7 @@ ui <- shinydashboard::dashboardPage(
           tabName = 'scCN',
           shiny::fluidRow(
             shiny::column(
-              width = 2,
+              width = 3,
               shiny::selectInput(
                 inputId = 'Chr__scCN',
                 label = 'Chromosome',
@@ -484,7 +460,7 @@ ui <- shinydashboard::dashboardPage(
               )
             ),
             shiny::column(
-              width = 5,
+              width = 6,
               shiny::sliderInput(
                 width = '100%',
                 inputId = 'range__scCN',
@@ -506,16 +482,23 @@ ui <- shinydashboard::dashboardPage(
                 label = 'Max CN Levels',
                 width = '100%'
               )
-            ),
+            )),
+          shiny::fluidRow(
             shiny::column(
-              width = 2,
+              width = 3,
               shiny::actionButton(
                 inputId = 'Save__scCN',
                 label = 'Save',
                 width = '100%'
               )
-            )
-          ),
+            ),
+          shiny::column(width = 1,
+                        hw_plot_ui(
+                          'HW_scCN',
+                          up = F,
+                          height = 15,
+                          width = 10
+                        ))),
           shiny::uiOutput('scCN_UI')
         )
       })
@@ -1020,6 +1003,10 @@ server <- function(input, output, session) {
     ),
     {
       if (nrow(data$RT) > 0) {
+
+        size_scPlot = hw_plot_server('HW_scPlot')
+        size_scPlot = size_scPlot()
+
         G = unique(data$RT$group)
 
         scPlot_module_ls$ui = lapply(G, function(g)
@@ -1057,6 +1044,7 @@ server <- function(input, output, session) {
             colors=data$samples_names_and_colors%>%
               dplyr::filter(
                 group == g),
+            size_plot=size_scPlot,
             save = variables$Save__scPlot
 
           ))
@@ -1116,7 +1104,13 @@ server <- function(input, output, session) {
                           input$Levels__scCN,
                           input$Save__scCN),
                         {
+
                           if (nrow(data$RT) > 0) {
+
+                            #plot dim
+                            size_scCN = hw_plot_server('HW_scCN')
+                            size_scCN = size_scCN()
+
                             G = unique(data$RT$group)
 
                             scCN_module_ls$ui = lapply(G, function(g)
@@ -1145,6 +1139,7 @@ server <- function(input, output, session) {
                                 Levels = input$Levels__scCN,
                                 out = file.path(variables$roots['OutputFolder'],
                                                 input$Analysis_Name, 'scCN'),
+                                size_plot=size_scCN,
                                 save = variables$Save__scCN
                               ))
                             if (variables$Save__scCN) {
@@ -1264,8 +1259,8 @@ server <- function(input, output, session) {
         BinRep_module_ls$ui = lapply(Groups, function(x)
           BinRepProb_ui(paste0('BinRepProb', x), title = x))
 
-        sizes = hw_plot_server('hw_BinRep')
-        sizes = sizes()
+        size = hw_plot_server('hw_BinRep')
+        size = size()
 
         if (variables$Save__BinRep) {
           variables$Save__BinRep = F
@@ -1279,7 +1274,7 @@ server <- function(input, output, session) {
                 'BinsRepProb'
               ) ,
               colors = variables$colors_BinRep,
-              sizes = sizes,
+              size = size,
               file_name = x,
               save = T
             ))
@@ -1295,7 +1290,7 @@ server <- function(input, output, session) {
                 'BinsRepProb'
               ) ,
               colors = variables$colors_BinRep,
-              sizes = sizes,
+              size = size,
               file_name = x,
               save = F
             ))

@@ -65,10 +65,17 @@ Dim_red_sub_pop_ui = function(id) {
           label = 'Save',
           width = '100%'
         )
-      )
+      ),
+      shiny::column(width = 1,
+                    hw_plot_ui(
+                      ns('save_First'),
+                      up = F,
+                      height = 7,
+                      width = 10
+                    ))
     ),
     shiny::fluidRow(align = 'center',
-                    shiny::plotOutput(ns('dred_out'))),
+                    shiny::plotOutput(ns('dred_out'),width = '50%',height = 'auto')),
     shiny::fluidRow(
       shiny::column(
         width = 3,
@@ -121,7 +128,7 @@ Dim_red_sub_pop_ui = function(id) {
 }
 
 
-Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3,colors) {
+Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder,colors, cores = 3) {
   shiny::moduleServer(id,
                       function(input,
                                output,
@@ -130,7 +137,8 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3,colors) 
                                Cores = cores,
                                Out = out,
                                col=colors,
-                               IN = Inputfolder) {
+                               IN = Inputfolder,
+                               ID=id) {
                         #load required operators
                         `%>%` = tidyr::`%>%`
 
@@ -305,7 +313,7 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3,colors) 
                                 x = paste(input$setting, '1', sep = '-'),
                                 y = paste(input$setting, '2', sep = '-'),
                                 color = input$color
-                              ) + ggplot2::theme(aspect.ratio = 0.5)
+                              )
 
                             if (input$color == '%Rep') {
                               Data_to_plot$plot = Data_to_plot$plot +
@@ -321,17 +329,28 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3,colors) 
                                 ggplot2::scale_color_manual(values = Colors)
                             }
 
-                            output$dred_out = shiny::renderPlot(Data_to_plot$plot)
+                            output$dred_out = shiny::renderPlot(Data_to_plot$plot,
+                                                                height = function() {
+                                                                  session$clientData[[paste0('output_', ID, '-dred_out_width')]]*0.8})
                           })
                         })
 
                         shiny::observeEvent(input$save, {
+                          #create dir
                           if (!dir.exists(file.path(Out, input$setting))) {
                             dir.create(file.path(Out, input$setting), recursive = T)
                           }
+                          #plot size
+
+                          First_plot_dim=hw_plot_server('save_First')
+                          First_plot_dim=First_plot_dim()
+                          #plot
                           ggplot2::ggsave(
                             plot = Data_to_plot$plot,
                             device = grDevices::cairo_pdf,
+                            width = First_plot_dim$width,
+                            height = First_plot_dim$height,
+                            units = First_plot_dim$unit,
                             filename = file.path(
                               Out,
                               input$setting,
@@ -416,7 +435,6 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3,colors) 
                         })
 
                         shiny::observeEvent(c(
-                          input$save,
                           input$what,
                           input$Sample,
                           input$phase,
@@ -466,14 +484,18 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3,colors) 
                                       shiny::plotOutput(
                                         ns("plot1_subpop"),
                                         click = ns('click_subpop'),
-                                        dblclick = ns('dbclick_subpop')
+                                        dblclick = ns('dbclick_subpop'),
+                                        width = '100%',
+                                        height = 'auto'
                                       ),
                                       align = "center"
                                     ),
                                     shiny::column(width = 6,
                                                   shiny::plotOutput(ns(
                                                     "plot2_subpop"
-                                                  )))
+                                                  ),
+                                                  width = '100%',
+                                                  height = 'auto'))
                                   ),
                                   shiny::fluidRow(
                                     shiny::column(
@@ -487,6 +509,13 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3,colors) 
                                         )
                                       )
                                     ),
+                                    shiny::column(width = 1,
+                                                  hw_plot_ui(
+                                                    ns('save_second'),
+                                                    up = F,
+                                                    height = 7,
+                                                    width = 10
+                                                  )),
                                     shiny::column(
                                       width = 3,
                                       align = 'center',
@@ -586,7 +615,9 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3,colors) 
                                   } else{
                                     data_subpop$plot
                                   }
-                                })
+                                },
+                                height = function() {
+                                  session$clientData[[paste0('output_', ID, '-plot1_subpop_width')]]*0.8})
 
                               #disable save, cancel and remove last if no subgrous are defined
                               shiny::observe({
@@ -676,7 +707,9 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3,colors) 
                                     } else{
                                       NULL
                                     }
-                                  })
+                                  },
+                                  height = function() {
+                                    session$clientData[[paste0('output_', ID, '-plot2_subpop_width')]]*0.8})
 
                                 data_subpop$summary = data_subpop$data %>%
                                   dplyr::group_by(subgroup, phase) %>%
@@ -750,6 +783,9 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3,colors) 
                                         '_subpop.tsv')
                                       ))
 
+                                    Second_plot_dim=hw_plot_server('save_second')
+                                    Second_plot_dim=Second_plot_dim()
+
                                     ggplot2::ggsave(
                                       plot = data_subpop$plot1(),
                                       filename = file.path(
@@ -762,7 +798,10 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3,colors) 
                                           '_subgroups.pdf'
                                         )
                                       ),
-                                      device = grDevices::cairo_pdf
+                                      device = grDevices::cairo_pdf,
+                                      width = Second_plot_dim$width,
+                                      height = Second_plot_dim$height,
+                                      units = Second_plot_dim$unit,
                                     )
                                   } else{
 
@@ -801,7 +840,7 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3,colors) 
                                         #plot grouping results
                                         shiny::fluidRow(
                                           shiny::htmlOutput(ns('results_subpop')),
-                                          shiny::plotOutput(ns("plot3_subpop"))
+                                          shiny::plotOutput(ns("plot3_subpop"),width = '50%',height = 'auto')
                                         )
                                       )
                                     })
@@ -941,16 +980,21 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder, cores = 3,colors) 
                                       output$plot3_subpop <-
                                         renderPlot({
                                           data_subpop$plot1()
-                                        })
+                                        },
+                                        height = function() {
+                                          session$clientData[[paste0('output_', ID, '-plot3_subpop_width')]]*0.8
+                                        } )
                                       output$results_subpop = shiny::renderText(
                                         '<h2><b><p style="color:red", align="center">Results</p></b></h2>'
                                       )
                                       data_subpop$found_matches = T
+
                                     } else{
                                       output$results_subpop = renderText('<b> It was not possible to match G1/G2- and S-phase groups. </b>')
                                       data_subpop$found_matches = F
                                     }
                                   }
+                                  shinyjs::enable('SaveGroups_subpop')
                                   shinyjs::enable('save_subpop')
 
                                 } else{
