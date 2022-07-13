@@ -142,7 +142,9 @@ ui <- shinydashboard::dashboardPage(
               shiny::column(width = 1,
                             shiny::h4('Color')),
               shiny::column(width = 7,
-                            shiny::h4('Plotting Groups'))
+                            shiny::h4('Plotting Group',
+                              bsplus::shiny_iconlink() %>%
+                              bsplus::bs_embed_popover(title = 'If a sample has to be plotted in multiple groups, please divide each group with a semicolon.' , placement = 'right')))
             ),
             shiny::uiOutput('Samples_colors_group_plot'),
             shiny::fluidRow(shiny::column(
@@ -309,6 +311,12 @@ server <- function(input, output, session) {
 
         varialbes$data = varialbes$data %>%
           unique()
+
+        #if basenames are repeted merege basename and group
+        if(length(unique(varialbes$data$group))>length(unique(varialbes$data$basename))){
+          varialbes$data = varialbes$data %>%
+            tidyr::unite(basename,basename,group,sep = ' - ',remove = F)
+        }
 
         output$RT_loaded = shiny::renderText(NULL)
         #set colors

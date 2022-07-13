@@ -37,7 +37,7 @@ colors_server = function(id, input, output, session) {
 }
 
 # select sample, assign groups and select color
-groupped_plots_colors_ui = function(id, color = 'red') {
+grouped_plots_colors_ui = function(id, color = 'red') {
   ns = shiny::NS(id)
   shiny::fluidRow(
     shiny::column(
@@ -89,7 +89,7 @@ groupped_plots_colors_ui = function(id, color = 'red') {
   )
 }
 
-groupped_plots_colors_server = function(id, input, output, session) {
+grouped_plots_colors_server = function(id, input, output, session) {
   shiny::moduleServer(id =  id, function(input, output, session) {
     return(shiny::reactive({
       if (!is.null(input$Sample)) {
