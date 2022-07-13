@@ -48,7 +48,7 @@ The first step consists in trimming our single-cell data and mapping them agains
 
     Kronos.scRT::FastqToBam(
       bowtie2_index = '~/location_bowtie2_Index/mm10',
-      File1 = '~/location_SRP130912_fastq_files/',
+      File1 = list.files(path ='~/location_SRP130912_fastq_files/',full.names = T),
       outputdir = '~/outputDirectory',
       cores = 6)
 
