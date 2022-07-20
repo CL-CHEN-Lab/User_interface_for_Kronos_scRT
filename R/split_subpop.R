@@ -1,4 +1,4 @@
-#'  Splits PerCell data frame based on identified subpopulations
+#'  Splits PerCell data frame based on identified sub-populations
 #'
 #' @return list
 #'
@@ -6,7 +6,7 @@
 #' @importFrom  dplyr select group_split inner_join
 #'
 #' @param PerCell, Kornos PerCell data frame produced by Kronos
-#' @param Supbop, Subpopulation grouping created by Kronos
+#' @param Supbop, Sub-population grouping created by Kronos
 #'
 #' @export
 #'
@@ -33,7 +33,7 @@ split_subpop = function(PerCell,
 
 }
 
-#'  Splits single cell CN data frame  based on identified subpopulations
+#'  Splits single cell CN dataframe  based on identified sub-populations
 #'
 #' @return list
 #'
@@ -41,7 +41,7 @@ split_subpop = function(PerCell,
 #' @importFrom  dplyr mutate select inner_join
 #'
 #' @param scCN, single cell CN data frame produced by Kronos
-#' @param Supbop, Subpopulation grouping created by Kronos
+#' @param Supbop, Sub-population grouping created by Kronos
 #'
 #' @export
 #'

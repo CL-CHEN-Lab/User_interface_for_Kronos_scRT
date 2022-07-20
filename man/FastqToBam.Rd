@@ -19,7 +19,9 @@ FastqToBam(
 \arguments{
 \item{bowtie2_index, }{path to bowtie2 index}
 
-\item{File1, }{list of paths to R2 fastq files for PE}
+\item{File1, }{list of paths to fastq files (R1 files for PE)}
+
+\item{File2, }{list of paths to R2 fastq files for PE}
 
 \item{adapters_list, }{list of adapters to trim, if not provided general illumina adaters will be used}
 
@@ -30,6 +32,8 @@ FastqToBam(
 \item{trim, }{logical value, if False reads won't be trimmed}
 
 \item{phred33, }{logical value, if False phred64 will be used}
+
+\item{Read_min_size_after_trimming, }{read minimum size to be kept}
 }
 \description{
 Trims and maps reads based on Rbowtie2

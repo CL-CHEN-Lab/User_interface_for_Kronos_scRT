@@ -60,12 +60,13 @@ Twidth_ui = function(id, title = NULL) {
         ),
         shiny::column(
           width = 3,
+          shinyjs::disabled(
           shiny::actionButton(
             inputId = ns('save_tw'),
             label = 'Save',
             width = '100%'
           )
-        ),
+        )),
         shiny::column(width = 1,
                       shiny::uiOutput(ns('HW_TW_UI')))
       )
@@ -131,11 +132,6 @@ Twidth_server = function(id,
 
 
                         shiny::observeEvent(input$run, {
-                          shinyjs::disable('Plot_type')
-                          shinyjs::disable('n_cat_tw')
-                          shinyjs::disable('save_tw')
-                          shinyjs::disable('run')
-
                           if (!is.null(input$n_cat_tw)) {
                             if (data$rerun) {
                               if (nrow(GA) > 0) {
@@ -173,6 +169,10 @@ Twidth_server = function(id,
                         })
 
                         shiny::observeEvent(input$run, {
+                          shinyjs::disable('Plot_type')
+                          shinyjs::disable('n_cat_tw')
+                          shinyjs::disable('save_tw')
+                          shinyjs::disable('run')
 
                           data$color=colors_server('color')
                           data$color=data$color()
@@ -214,7 +214,33 @@ Twidth_server = function(id,
                         })
 
 
+                        shiny::observeEvent(input$Plot_type,{
+                          if(nrow(data$variability)>0){
+                          if (input$Plot_type == 'Extended') {
+                            shinyjs::show('n_cat_tw')
+                            data$plot = Kronos.scRT::Twidth_extended_plot(
+                              Variability = data$variability,
+                              Fitted_data = data$twidth_fitted_data,
+                              Twidth = data$twidth,
+                              Color = data$color
+                            )
 
+                            #render plot
+                            output$plot = shiny::renderPlot({
+                              data$plot + ggplot2::theme(aspect.ratio = data$hw_TW_size$height / data$hw_TW_size$width)
+                            })
+                          } else{
+                            shinyjs::hide('n_cat_tw')
+
+                            data$plot = Kronos.scRT::Twidth_barplot(Variability = data$variability,
+                                                                    Twidth = data$twidth,
+                                                                    Color = data$color)
+                            output$plot = shiny::renderPlot({
+                              data$plot + ggplot2::theme(aspect.ratio = data$hw_TW_size$height / data$hw_TW_size$width)
+                            })
+
+                          }}
+                        })
                         shiny::observeEvent(input$save_tw, {
                           if (!dir.exists(Out)) {
                             dir.create(Out, showWarnings = FALSE)
@@ -247,12 +273,7 @@ Twidth_server = function(id,
                                                Out,
                                                paste0(
                                                  basename,
-                                                 '_twith_',
-                                                 data$ncores,
-                                                 '_',
-                                                 input$Plot_type,
-                                                 '_',
-                                                 '_categories.txt'
+                                                 '_twith.txt'
                                                )
                                              ))
                           }

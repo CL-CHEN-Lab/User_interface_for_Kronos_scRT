@@ -110,7 +110,7 @@ recover_and_mutate = function(Reads, Sequence, errorRate) {
 #'
 #' @param Reads, output of recover_and_mutate
 #' @param path, path where to save the file
-#' @param Chr, Chromosome from wich the reads are originated
+#' @param Chr, Chromosome from which the reads are originated
 #' @param ID, read identifier
 #'
 #' @export
@@ -196,7 +196,7 @@ rev_com = function(sequence) {
 #'
 #' @param RefGenome, path to .fa file
 #' @param bowtie2_index, bowtie2 index
-#' @param bin_size, size of the final bin in bp: defailt = 20 000
+#' @param bin_size, size of the final bin in bp: default = 20 000
 #' @param read_size, size of a read in bp: default= 40bp
 #' @param fragment_size, size of a fragment in bp if paired_ends=T: default= 200bp
 #' @param paired_ends, logical, whether reads have to be PE or SE: default= False
@@ -208,7 +208,7 @@ rev_com = function(sequence) {
 #' @param coverage, an integer corresponding to the simulated coverage
 #' @param errorRate, simulated sequencer percentage error rate
 #' @param chr_prefix, prefix identifying a chromosome in the .fa file: default='chr'
-#' @param chr_range, chomosomes to considere in the analysis. Use ':' to identify a range and ',' for isolated chromosomes. default='1:22'
+#' @param chr_range, chromosomes to consider in the analysis. Use ':' to identify a range and ',' for isolated chromosomes. default='1:22'
 #' @param cores, number of cores to use
 #' @param return_estimated_param, logical value. If True and directory_to_bamfiles has been passed it returns a list wit the estimated parameters and the calculated bins
 #' @export
@@ -246,15 +246,13 @@ binning = function(RefGenome,
   #loading reference fa
   reference = Biostrings::readDNAStringSet(RefGenome)
 
-  #exstimate paramenters
-
-  #declair clusters
+  #declare clusters
   cl = snow::makeCluster(cores)
   doSNOW::registerDoSNOW(cl)
   on.exit(snow::stopCluster(cl))
 
 
-  #sample 30 files (if available) to exstimate parameters
+  #sample 30 files (if available) to estimate parameters
   if (!is.null(directory_to_bamfiles)) {
     list = list.files(path = directory_to_bamfiles,
                       pattern = 'bam$',
@@ -265,8 +263,7 @@ binning = function(RefGenome,
     }
 
     parameters = foreach::foreach(file = list,
-                                  .combine = 'rbind',
-                                  .packages = 'Rsamtools') %dopar% {
+                                  .combine = 'rbind') %dopar% {
                                     sapply(Rsamtools::scanBam(
                                       file = file,
                                       param = Rsamtools::ScanBamParam(what =
@@ -309,7 +306,7 @@ binning = function(RefGenome,
     chr_list = unique(names(reference))
   } else{
     chr_list = paste0(ifelse(is.null(chr_prefix), '', chr_prefix),
-                      unlist(Kronos.scRT::String_to_Range(stringr::str_split(chr_range, ',')[[1]])))
+                      unlist(Kronos.scRT::String_to_Range(stringr::str_split(chr_range, ',',simplify = T))))
     chr_list = chr_list[chr_list %in% unique(names(reference))]
   }
   genome.Chromsizes = foreach::foreach(Chr = chr_list,
@@ -567,7 +564,7 @@ binning = function(RefGenome,
         dplyr::select('chr' = rname, pos, read)
     ) %>%
       tidyr::drop_na()
-    #parameter used to estiamte mappability th
+    #parameter used to estimate mappability th
     theoretical_reads = bin_size / fragment_size
 
   } else{
@@ -581,7 +578,7 @@ binning = function(RefGenome,
       dplyr::mutate(read = 1) %>%
       dplyr::select('chr' = rname, pos, read)
 
-    #parameter used to estiamte mappability th
+    #parameter used to estimate mappability th
     theoretical_reads = bin_size / read_size
 
   }
@@ -593,7 +590,7 @@ binning = function(RefGenome,
                              bins_chr = dplyr::tibble(chr = Chr,
                                                       start = seq(0, size, by = bin_size)) %>%
                                dplyr::mutate(end = dplyr::lead(start, n = 1, default =  size))
-                             ## calculate reads per bin Selected reads
+                             ## calculate reads per bin
                              reads_proper <-
                                bins$pos[bins$chr == Chr &
                                           bins$read == 0.5]
@@ -647,7 +644,7 @@ binning = function(RefGenome,
     ) %>%
     dplyr::select(chr, start, end, mappability, mappability_th)
 
-  #calculate gc % peer bin
+  #calculate gc % per bin
   bins = foreach::foreach(i = unique(bins$chr), .combine = 'rbind') %dopar% {
     #load operator
     `%>%` = tidyr::`%>%`

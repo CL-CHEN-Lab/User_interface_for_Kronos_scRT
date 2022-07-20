@@ -6,10 +6,10 @@
 #' @importFrom  ggplot2 aes annotate coord_cartesian element_blank facet_grid geom_boxplot ggplot labs scale_fill_manual scale_y_continuous theme unit xlab ylab
 #'
 #' @param Variability, a row bind combination of dataframes produce by Prepare_G1G2_phase_cells_forBinRepProb and Prepare_S_phase_cells_forBinRepProb or ether of the 2
-#' @param upper_range, limits of the upper pannel
-#' @param lower_range, limits of the upper pannel
-#' @param relative_heights, relative heights between the 3 pannels
-#'
+#' @param upper_range, limits of the upper panel
+#' @param lower_range, limits of the lower panel
+#' @param relative_heights, relative heights between the 3 panels
+#' @param colors, boxplot fill colors to pass to ggplot
 #'
 #' @export
 #'
@@ -17,27 +17,64 @@
 BinRepProbPlot = function(Variability,
                           upper_range = c(0.95, 1),
                           lower_range = c(0, 0.05),
-                          relative_heights = c(1, 2, 1)) {
+                          relative_heights = c(1, 2, 1),
+                          colors=NULL) {
   #load operator
   `%>%` = tidyr::`%>%`
 
+  #number of groups
+  plot_groups=unique(Variability$type)
+  #define colors
+  if(is.null(colors)){
+    colors=c(
+      "Early S cells" = '#a7001b',
+      "Late S cells" = '#005095',
+      'Mid S cells' = '#dfbd31',
+      'G1/G2 cells' = 'grey'
+    )
+  }else if(length(colors)< length(plot_groups) & is.null(names(colors))){
+    #if the given colors are less than the number of types and the vector is not named
+    default_colors=c(
+      "Early S cells" = '#a7001b',
+      "Late S cells" = '#005095',
+      'Mid S cells' = '#dfbd31',
+      'G1/G2 cells' = 'grey'
+    )
+    #select default colors
+    default_colors=default_colors[plot_groups]
+
+    # substitute default colors with provided ones
+    colors=sapply(1:length(plot_groups), function(x) {
+      ifelse(is.na(colors[x]),default_colors[x],colors[x])
+    } )
+
+    #name the vector
+    names(colors)=plot_groups
+
+  }else if(length(colors)<  length(plot_groups) & !is.null(names(colors))){
+
+    #if not enough colors have been provided and the list is named
+    default_colors=c(
+      "Early S cells" = '#a7001b',
+      "Late S cells" = '#005095',
+      'Mid S cells' = '#dfbd31',
+      'G1/G2 cells' = 'grey'
+    )
+    # replace default colors with provided ones
+    colors=sapply(plot_groups, function(x){
+      ifelse(is.na(colors[x]),default_colors[x],colors[x])
+    })
+    #reassign names
+    names(colors)=plot_groups
+  }
+
   # select
   p = Variability %>%
-    dplyr::mutate(RT = round(RT, 1)) %>%
-    dplyr::group_by(chr, start, end, RT, type, group) %>%
-    dplyr::summarise(Replicated = mean(Rep, na.rm = T)) %>%
-    dplyr::ungroup() %>%
-    dplyr::mutate(RT = factor(RT, levels = seq(1, 0, -0.1))) %>%
-    ggplot2::ggplot(ggplot2::aes(RT, Replicated, fill = type)) +
+    ggplot2::ggplot(ggplot2::aes(RT, BinRepProb, fill = type)) +
     ggplot2::geom_boxplot() +
     ggplot2::ylab('Bin probability of replication') +
     ggplot2::scale_fill_manual(
-      values = c(
-        "Early S cells" = '#a7001b',
-        "Late S cells" = '#005095',
-        'Mid S cells' = '#dfbd31',
-        'G1/G2 cells' = 'grey'
-      )
+      values = colors
     ) +
     ggplot2::labs(fill = NULL) +
     ggplot2::facet_grid(~ type) +
@@ -67,8 +104,8 @@ BinRepProbPlot = function(Variability,
         "rect",
         xmin = 0.5,
         xmax = 11.5,
-        ymin = -0.01,
-        ymax = 0.05,
+        ymin = lower_range[1],
+        ymax = lower_range[2],
         fill = NA,
         color = 'black',
         linetype = 'dashed'
@@ -77,8 +114,8 @@ BinRepProbPlot = function(Variability,
         "rect",
         xmin = 0.5,
         xmax = 11.5,
-        ymin = 0.95,
-        ymax = 1.01,
+        ymin = upper_range[1],
+        ymax = upper_range[2],
         fill = NA,
         color = 'black',
         linetype = 'dashed'
@@ -94,7 +131,7 @@ BinRepProbPlot = function(Variability,
       ggplot2::scale_y_continuous(breaks = lower_range),
     ncol = 1,
     rel_heights = relative_heights
-  ) + ggplot2::theme(aspect.ratio = 0.5)
+  )
 
   return(q)
 
@@ -107,7 +144,7 @@ BinRepProbPlot = function(Variability,
 #' @importFrom  tidyr %>%
 #'
 #' @param G1.G2, G1/G2 single cell CNV dataframe
-#' @param RT, pseudobulk replication timing dataframe
+#' @param RT, pseudo bulk replication timing dataframe
 #' @param quantile.range, Ploidy quantile range to keep a G1/G2 cell
 #'
 #'
@@ -121,7 +158,7 @@ Prepare_G1G2_phase_cells_forBinRepProb = function(G1.G2, RT, quantile.range =
 
   #identify G1 cells to carry on
   MP = G1.G2 %>%
-    dplyr::group_by(Cell, group)  %>%
+    dplyr::group_by(Cell,basename, group)  %>%
     dplyr::summarise(Mean_ploidy = mean(CN)) %>%
     dplyr::group_by(group) %>%
     dplyr::mutate(
@@ -135,7 +172,7 @@ Prepare_G1G2_phase_cells_forBinRepProb = function(G1.G2, RT, quantile.range =
   G1.G2 %>%
     dplyr::filter(Cell %in% MP) %>%
     dplyr::mutate(type = 'G1/G2 cells') %>%
-    dplyr::select(chr, start, end, Rep, newIndex, type, Cell, group) %>%
+    dplyr::select(chr, start, end, Rep, newIndex, type, Cell,basename, group) %>%
     dplyr::inner_join(RT %>% dplyr::select(chr, start, end, RT, group),
                       by = c("chr", "start", "end", "group")) %>%
     dplyr::mutate(type = factor(
@@ -146,6 +183,11 @@ Prepare_G1G2_phase_cells_forBinRepProb = function(G1.G2, RT, quantile.range =
                  'G1/G2 cells')
     )) %>%
     dplyr::ungroup() %>%
+    dplyr::mutate(RT = round(RT, 1)) %>%
+    dplyr::group_by(chr, start, end, RT, type, basename,group) %>%
+    dplyr::summarise(BinRepProb = mean(Rep, na.rm = T)) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(RT = factor(RT, levels = seq(1, 0, -0.1))) %>%
     return()
 
 }
@@ -158,10 +200,9 @@ Prepare_G1G2_phase_cells_forBinRepProb = function(G1.G2, RT, quantile.range =
 #'
 #' @param S, S single cell CNV dataframe
 #' @param RT, pseudobulk replication timing dataframe
-#' @param Early.cells, percentage of replication range difying Early replicating cells (0-100)
-#' @param Mid.cells, percentage of replication range difying Mid replicating cells (0-100)
-#' @param Late.cells, percentage of replication range difying Late replicating cells (0-100)
-#'
+#' @param Early.cells, percentage of replication range defying Early replicating cells (0-100)
+#' @param Mid.cells, percentage of replication range defying Mid replicating cells (0-100)
+#' @param Late.cells, percentage of replication range defying Late replicating cells (0-100)
 #' @export
 #'
 
@@ -204,7 +245,7 @@ Prepare_S_phase_cells_forBinRepProb = function(S,
         PercentageReplication >= min(Mid.cells)
     ) ~ 'Mid S cells'
     )) %>%
-    dplyr::select(chr, start, end, Rep, newIndex, type, Cell, group) %>%
+    dplyr::select(chr, start, end, Rep, newIndex, type, Cell,basename, group) %>%
     dplyr::inner_join(RT %>% dplyr::select(chr, start, end, RT, group),
                       by = c("chr", "start", "end", "group")) %>%
     dplyr::mutate(type = factor(
@@ -214,7 +255,12 @@ Prepare_S_phase_cells_forBinRepProb = function(S,
                  'Late S cells',
                  'G1/G2 cells')
     )) %>%
+    dplyr::ungroup()%>%
+    dplyr::mutate(RT = round(RT, 1)) %>%
+    dplyr::group_by(chr, start, end, RT, type, basename,group) %>%
+    dplyr::summarise(BinRepProb = mean(Rep, na.rm = T)) %>%
     dplyr::ungroup() %>%
+    dplyr::mutate(RT = factor(RT, levels = seq(1, 0, -0.1)))  %>%
     return()
 
 }

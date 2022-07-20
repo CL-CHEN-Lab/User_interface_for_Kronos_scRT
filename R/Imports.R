@@ -8,7 +8,7 @@
 #'
 #' @importFrom umap umap
 #'
-#' @importFrom shinyWidgets switchInput updateSwitchInput
+#' @importFrom shinyWidgets switchInput updateSwitchInput colorPickr dropdown
 #'
 #' @importFrom sp point.in.polygon
 #'
@@ -19,5 +19,11 @@
 #' @importFrom shinyjs show disable enable extendShinyjs hidden hide useShinyjs disabled reset toggle
 #'
 #' @importFrom shiny actionButton column div fluidPage fluidRow htmlOutput isolate numericInput observe observeEvent onSessionEnded radioButtons reactiveValues renderTable renderText renderUI selectInput shinyApp sliderInput stopApp tableOutput textInput uiOutput updateActionButton updateSelectInput updateSliderInput updateTextInput moduleServer NS plotOutput renderPlot checkboxGroupInput updateCheckboxGroupInput h4 reactive req updateNumericInput img brushOpts tabPanel updateRadioButtons updateTabsetPanel tags
+#'
+#' @importFrom optparse parse_args OptionParser make_option
+#'
+#' @importFrom ade4 dist.binary
+#'
+#' @import umap
 
 NULL

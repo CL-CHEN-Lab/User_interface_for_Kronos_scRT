@@ -12,14 +12,14 @@
 IdAdapters = function(File, Adapter_sequences) {
   #read first 10^6 reads
   reads = readr::read_lines(File, n_max = 4 * 10 ^ 6)
-  #select sequeces only convert into DNAstringset
+  #select sequences and convert into DNAstringset
   reads = Biostrings::DNAStringSet(reads[base::seq(2, length(reads), 4)])
 
   #recover short sequence
   short = sapply(Adapter_sequences, function(x)
     stringr::str_sub(x, start = 1, end = 13), simplify = T)
 
-  #count occurencies
+  #count occurrences
   counts = sapply(short, function(x)
     mean(Biostrings::vcountPattern(
       subject = reads, pattern = x
@@ -123,12 +123,13 @@ sequential_trimming = function(File, Read_adaters, outputdir,min_size=25,cores=1
 #'
 #' @param bowtie2_index, path to bowtie2 index
 #' @param File1, list of paths to fastq files (R1 files for PE)
-#' @param File1, list of paths to R2 fastq files for PE
+#' @param File2, list of paths to R2 fastq files for PE
 #' @param adapters_list, list of adapters to trim, if not provided general illumina adaters will be used
 #' @param outputdir, output path
 #' @param cores, number of parallel jobs
 #' @param trim, logical value, if False reads won't be trimmed
-#' @param phred33, logival value, if False phred64 wil be used
+#' @param phred33, logical value, if False phred64 will be used
+#' @param Read_min_size_after_trimming, read minimum size to be kept
 #'
 #' @export
 #'
@@ -161,7 +162,7 @@ FastqToBam = function(bowtie2_index,
         adapters = adapters_list
       }
 
-      #count occurencies
+      #count occurrences
       Read1_adaters = Kronos.scRT::IdAdapters(File = File1[Cell], Adapter_sequences = adapters)
 
       #check that if both 'ATGTGTATAAGAGACA','AGATGTGTATAAGAGACAG' are present, only 'AGATGTGTATAAGAGACAG' will go on
@@ -177,7 +178,7 @@ FastqToBam = function(bowtie2_index,
         outputdir = file.path(outputdir, 'trimmed'),
         min_size = Read_min_size_after_trimming
       )
-      #reconstruct same name given to the outptu of sequential_trimming
+      #reconstruct same name given to the output of sequential_trimming
       timmedF1 = paste0(
         stringr::str_split(
           string = basename(File1[Cell]),
@@ -189,7 +190,7 @@ FastqToBam = function(bowtie2_index,
 
       #do the same if file2 exits
       if (!is.null(File2[Cell])) {
-        #count occurencies
+        #count occurrences
         Read2_adaters = Kronos.scRT::IdAdapters(File = File2[Cell], Adapter_sequences = adapters)
 
         #check that if both 'ATGTGTATAAGAGACA','AGATGTGTATAAGAGACAG' are present, only 'AGATGTGTATAAGAGACAG' will go on
@@ -205,7 +206,7 @@ FastqToBam = function(bowtie2_index,
           outputdir = file.path(outputdir, 'trimmed'),
           min_size = Read_min_size_after_trimming
         )
-        #reconstruct same name given to the outptu of sequential_trimming
+        #reconstruct same name given to the output of sequential_trimming
         timmedF2 = paste0(
           stringr::str_split(
             string = basename(File2[Cell]),
@@ -216,7 +217,7 @@ FastqToBam = function(bowtie2_index,
         )
       }
     } else{
-      #if trim is no trequire
+      #if trim is not required
       timmedF1 = File1[Cell]
       timmedF2 = File2[Cell]
     }
@@ -226,7 +227,7 @@ FastqToBam = function(bowtie2_index,
     }
 
     if (is.null(File2[Cell])) {
-      #difene output name
+      #defene output name
       SamFile = file.path(
         outputdir,
         'BAM',
@@ -245,7 +246,7 @@ FastqToBam = function(bowtie2_index,
         overwrite = TRUE
       )
     } else{
-      #difene output name
+      #define output name
       SamFile = file.path(
         outputdir,
         'BAM',
@@ -308,7 +309,7 @@ mergefastq = function(FileList,
     ),
     '_combined.fastq')
   }
-  #if directory does not exitst create id
+  #if directory does not exists create id
   if (!dir.exists(output)) {
     dir.create(output, recursive = T)
   }
@@ -381,7 +382,7 @@ Decompress_if_needed = function(File, outdir = NULL) {
 #' @importFrom tidyr %>%
 #'
 #' @param Bamfile, a bam file directory
-#' @param isPE, logical value indicateding whether reads are PE (TRUE) or SE (FALSE)
+#' @param isPE, logical value indicating whether reads are PE (TRUE) or SE (FALSE)
 #'
 #' @export
 #'

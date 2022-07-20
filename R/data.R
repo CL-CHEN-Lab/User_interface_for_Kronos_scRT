@@ -111,7 +111,7 @@
 
 #' @title SingneCell RT Test object
 #'
-#' @description A \code{list} with two \code{tibble}: PerCell and CNV for Jeff cell repicate 1. Assembly Hg38.
+#' @description A \code{list} with two \code{tibble}: PerCell and CNV for Jeff cell replicate 1. Assembly Hg38.
 #'
 #' @format A list containing two tibbles variables:
 #' \describe{
@@ -148,7 +148,7 @@
 
 #' @title SingneCell RT Test object
 #'
-#' @description A \code{list} with two \code{tibble}: PerCell and CNV for Jeff cell repicate 2. Assembly Hg38.
+#' @description A \code{list} with two \code{tibble}: PerCell and CNV for Jeff cell replicate 2. Assembly Hg38.
 #'
 #' @format A list containing two tibbles variables:
 #' \describe{
@@ -185,7 +185,7 @@
 
 #' @title SingneCell RT Test object
 #'
-#' @description A \code{list} with two \code{tibble}: PerCell and CNV for HeLa S3 cell repicate 1. Assembly Hg38.
+#' @description A \code{list} with two \code{tibble}: PerCell and CNV for HeLa S3 cell replicate 1. Assembly Hg38.
 #'
 #' @format A list containing two tibbles variables:
 #' \describe{
@@ -222,7 +222,7 @@
 
 #' @title SingneCell RT Test object
 #'
-#' @description A \code{list} with two \code{tibble}: PerCell and CNV for HeLa S3 cell repicate 2. Assembly Hg38.
+#' @description A \code{list} with two \code{tibble}: PerCell and CNV for HeLa S3 cell replicate 2. Assembly Hg38.
 #'
 #' @format A list containing two tibbles variables:
 #' \describe{
@@ -258,7 +258,7 @@
 "HeLa_rep2"
 
 
-#' @title MCF7 Referene RT
+#' @title MCF7 Reference RT
 #'
 #' @description A \code{tibble} containing bulk replication timing data derived from a Hg19 -> Hg38 liftover.
 #'
@@ -273,7 +273,7 @@
 #' @source \url{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM923442}
 "MCF7_Reference"
 
-#' @title GM12878 Referene RT
+#' @title GM12878 Reference RT
 #'
 #' @description A \code{tibble} containing bulk replication timing data derived from a Hg19 -> Hg38 liftover.
 #'
@@ -288,7 +288,7 @@
 #' @source \url{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM923451}
 "GM12878_Reference"
 
-#' @title HeLa S3 Referene RT
+#' @title HeLa S3 Reference RT
 #'
 #' @description A \code{tibble} containing bulk replication timing data derived from a Hg19 -> Hg38 liftover.
 #'

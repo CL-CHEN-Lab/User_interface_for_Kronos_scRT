@@ -4,12 +4,14 @@
 \alias{FilterCells}
 \title{filter cells}
 \usage{
-FilterCells(scCN, min_cor = 0.25, ApplyFilter = F)
+FilterCells(scCN, min_cor = 0.25, save_plot_basename = NULL)
 }
 \arguments{
 \item{scCN, }{scCN dataframe from Replication_state function}
 
 \item{min_cor, }{min correlation to be kept}
+
+\item{save_plot_name, }{if provided the function saves plots instead of returning them}
 }
 \value{
 list

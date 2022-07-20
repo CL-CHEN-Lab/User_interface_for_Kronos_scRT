@@ -9,10 +9,6 @@
 #' @param seed, an integer
 #' @param ..., other parameters that can be passed to Rtsne
 #'
-#' @examples
-#' \dontrun{
-#' TSNE(X,seed,...)
-#' }
 #'
 
 TSNE = function(X, seed, ...) {

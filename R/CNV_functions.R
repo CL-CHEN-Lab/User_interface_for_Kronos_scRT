@@ -25,7 +25,7 @@
 #' @param min_n_reads, Min n of reads to keep a cell in the analysis
 #' @param mim_mean_CN_accepted, Min mean CN accepted as result
 #' @param max_mean_CN_accepted, Max mean CN accepted as result
-#' @param ploidy, user extimated ploidy
+#' @param ploidy, user estimated ploidy
 #' @param chr_prefix, Chromosome prefix, if there is no prefix use NULL
 #' @param chr_range, Chromosomes to consider in the analysis (example 1:5,8,15:18,X)
 #' @param cores, Number of cores to use
@@ -86,7 +86,7 @@ CallCNV = function(directory,
     dir.create(tmp_dir)
   }
 
-  #calcualte genome size
+  #calculate genome size
   genome_size = sum(chrom_size$size)
 
   #select chrs
@@ -94,7 +94,7 @@ CallCNV = function(directory,
     chromosome = unique(bins$chr)
   } else{
     chromosome = paste0(ifelse(is.null(chr_prefix), '', chr_prefix),
-                        unlist(Kronos.scRT::String_to_Range(stringr::str_split(chr_range, ',')[[1]])))
+                        unlist(Kronos.scRT::String_to_Range(stringr::str_split(chr_range, ',',simplify = T))))
     bins = bins[bins$chr %in% chromosome,]
   }
 
@@ -109,7 +109,7 @@ CallCNV = function(directory,
     unique() %>%
     dplyr::pull()
 
-  #declair cluster
+  #declare clusters
   cl = snow::makeCluster(cores)
   doSNOW::registerDoSNOW(cl)
   on.exit(snow::stopCluster(cl))
@@ -177,7 +177,7 @@ CallCNV = function(directory,
                                   dplyr::group_by(rname) %>%
                                   dplyr::mutate(bin = ceiling(pos / bins_median_size))
 
-                                # remube duplicates
+                                # remove duplicates
                                 #calculate the cumulative size based on chr order. merge with data and add it to the position of the read
                                 if (nrow(FP) > 0 | nrow(SP) > 0) {
                                   Deduplicated_reads_list = dplyr::full_join(
@@ -195,7 +195,7 @@ CallCNV = function(directory,
                                     ),
                                     by = c('qname')
                                   ) %>%
-                                    #if position is sin the minus strand it is actully the last base of the read
+                                    #if position is sin the minus strand it is actually the last base of the read
                                     dplyr::mutate(
                                       pos.x = ifelse(strand.x == '+', pos.x + size.x, pos.x + size.x + qwidth.x),
                                       pos.y = ifelse(strand.y == '+', pos.y + size.y, pos.y +
@@ -203,7 +203,7 @@ CallCNV = function(directory,
                                     ) %>%
                                     dplyr::rowwise() %>%
                                     dplyr::mutate(start = min(pos.x, pos.y, na.rm = T),
-                                                  #if the mate was not mapped, use qwidth to ide the end of the read
+                                                  #if the mate was not mapped, use qwidth to id the end of the read
                                                   end = max(pos.x, pos.y, na.rm = T)) %>%
                                     dplyr::group_by(start, end) %>%
                                     #for duplicated reads keep either of the two
@@ -217,7 +217,7 @@ CallCNV = function(directory,
                                     dplyr::ungroup() %>%
                                     dplyr::select(qname, rname, 'mate_bin' = bin)
 
-                                  # if a read in a pair has it's paired in the same bin it counts as 1/2 a read eles one read.
+                                  # if a read in a pair has it's paired in the same bin it counts as 1/2 a read otherwise one read.
                                   FP = FP %>%
                                     dplyr::filter(qname %in% Deduplicated_reads_list) %>%
                                     dplyr::left_join(qname_sp, by = c("qname", 'rname')) %>%
@@ -240,6 +240,7 @@ CallCNV = function(directory,
                                   tidyr::drop_na() %>%
                                   dplyr::filter(rname %in% chromosome)
 
+                                if(nrow(SR)>0){
                                 Deduplicated_SR_list = SR %>%
                                   dplyr::mutate(pos = ifelse(strand == '+', pos, pos + qwidth)) %>%
                                   dplyr::group_by(rname, pos) %>%
@@ -251,6 +252,7 @@ CallCNV = function(directory,
                                   dplyr::mutate(read = 1) %>%
                                   dplyr::rename('chr' = rname) %>%
                                   dplyr::ungroup()
+                                }
 
 
                                 #total reads
@@ -258,7 +260,7 @@ CallCNV = function(directory,
 
                                 # include non paired reads if existing
                                 # sum all the reads in a bin
-                                if (length(SR$chr) != 0) {
+                                if (nrow(SR)!= 0) {
                                   sam = rbind(SR = SR  %>%
                                                 dplyr::group_by(chr) %>%
                                                 dplyr::mutate(bin = ceiling(pos / bins_median_size)),
@@ -585,7 +587,7 @@ CallCNV = function(directory,
     ) %>%
     dplyr::select(-d)
 
-  #fit dimapd to gaussian dist
+  #fit dimapd to Gaussian dist
   mem = 0
   while (T) {
     fit <-
@@ -625,7 +627,7 @@ CallCNV = function(directory,
   #delete tmp files
   sapply(file.path(tmp_dir, paste0(files$file, '_cnv_calls.bed')), file.remove)
 
-  #reshpe percell DF
+  #reshape percell DF
   mapd = mapd %>%
     dplyr::mutate(
       is_noisy = ifelse(

@@ -1,9 +1,9 @@
-#' Helps identifying parameters for scRT analysis. It opends a shiny app
+#' Helps identifying parameters for scRT analysis. It opens a shiny app
 #'
 #' @return list
 #'
 #' @importFrom tidyr %>%
-#' @importFrom foreach foreach %do% %dopar%
+#' @importFrom foreach foreach %:% %dopar%
 #' @importFrom dplyr filter select tibble case_when mutate pull
 #' @importFrom shinyjs disable enable extendShinyjs useShinyjs
 #' @importFrom shiny actionButton brushOpts column div fluidPage fluidRow h4 htmlOutput isolate observe observeEvent onSessionEnded plotOutput radioButtons reactive reactiveValues renderPlot renderText runApp sliderInput stopApp tabPanel tabsetPanel updateSliderInput updateTabsetPanel
@@ -15,6 +15,14 @@
 #' @importFrom LaplacesDemon is.unimodal
 #'
 #' @param PerCell, per cell dataframe from CallCNV
+#' @param interactive, if TRUE the function will start a shiny app
+#' @param min_RPMPH, min number of reads per megabase per haplotype for a cell to be considered
+#' @param G1G2_th, variability value under which cells are considered in G1/G2
+#' @param S_th, variability value above which cells are considered in S
+#' @param First_half_factor, parameter to adjust the first part of the S-phase
+#' @param Second_half_factor, parameter to adjust the second part of the S-phase
+#' @param Automatic_correction, If TRUE it tries to automatically find the parameters to adjust the S-phase
+#' @param lunch.in.Rstudio, if TRUE the shiny app is run in Rstudio otherwise on a browser.
 #' @param cores, number of cores to parallelise
 #'
 #' @export
@@ -69,9 +77,11 @@ diagnostic = function(PerCell,
                             plotOutput('plot__diagnostic')),
               shiny::column(
                 width = 6,
-                plotOutput('plot2__diagnostic',
-                brush = shiny::brushOpts(id = "plot2_brush__diagnostic",
-                                         direction = 'y'))
+                plotOutput(
+                  'plot2__diagnostic',
+                  brush = shiny::brushOpts(id = "plot2_brush__diagnostic",
+                                           direction = 'y')
+                )
               )
             ),
             shiny::fluidRow(
@@ -167,7 +177,7 @@ diagnostic = function(PerCell,
         #load required operators
         `%>%` = tidyr::`%>%`
         `%dopar%` = foreach::`%dopar%`
-        `%do%` = foreach::`%do%`
+        `%:%` = foreach::`%:%`
 
         #initialize
         R_df = shiny::reactiveValues(result = dplyr::tibble(),
@@ -177,7 +187,8 @@ diagnostic = function(PerCell,
 
         shiny::observe({
           #calculate median ploidy of the suppose G1
-          median_ploidy_not_noisy__diagnostic = R_df$PerCell %>% dplyr::filter(is_noisy == F) %>%
+          median_ploidy_not_noisy__diagnostic = R_df$PerCell %>%
+            dplyr::filter(is_noisy == F, is_high_dimapd == F) %>%
             dplyr::pull(mean_ploidy) %>% stats::median()
 
 
@@ -188,7 +199,7 @@ diagnostic = function(PerCell,
           shinyjs::disable('Apply_Correction__diagnostic')
 
           if (is.numeric(input$min_n_reads__diagnostic)) {
-            #prepae df
+            #prepare df
             R_df$PerCell = R_df$PerCell %>%
               dplyr::mutate(
                 Type = dplyr::case_when(
@@ -201,7 +212,7 @@ diagnostic = function(PerCell,
                 Type = dplyr::case_when(
                   coverage_per_1Mbp < input$min_n_reads__diagnostic * median_ploidy_not_noisy__diagnostic ~ 'Low Coverage',
                   ploidy_confidence < 2 &
-                    ploidy_confidence != -100 ~ 'Low Ployidy confidence',
+                    ploidy_confidence != -100 ~ 'Low ploidy confidence',
                   mean_ploidy < median_ploidy_not_noisy__diagnostic / 1.5 ~ 'Too low ploidy compared to G1/G2-phase pool',
                   mean_ploidy > median_ploidy_not_noisy__diagnostic * 2 ~ 'Too high ploidy compared to G1/G2-phase pool',
                   T ~ Type
@@ -230,7 +241,7 @@ diagnostic = function(PerCell,
               ggplot2::scale_color_manual(
                 values = c(
                   'Low Coverage' = "#ff7949",
-                  'Low Ployidy confidence' = "#70001e",
+                  'Low ploidy confidence' = "#70001e",
                   'Too low ploidy compared to G1/G2-phase pool' = "#01e7ab",
                   'Too high ploidy compared to G1/G2-phase pool' = "#a7001b",
                   'G1/G2-phase cells' = "#005095",
@@ -258,7 +269,7 @@ diagnostic = function(PerCell,
                                                       'G1/G2-phase cells') %>% dplyr::pull(mean_ploidy)
             )
 
-            #reassing cells based on new median ploidy
+            #reassign cells based on new median ploidy
             R_df$PerCell_subset = R_df$PerCell_subset %>%
               dplyr::mutate(
                 Type = dplyr::case_when(
@@ -346,7 +357,7 @@ diagnostic = function(PerCell,
                 ggplot2::scale_color_manual(
                   values = c(
                     'Low Coverage' = "#ff7949",
-                    'Low Ployidy confidence' = "#70001e",
+                    'Low ploidy confidence' = "#70001e",
                     'Too low ploidy compared to G1/G2' = "#01e7ab",
                     'Too high ploidy compared to G1/G2' = "#a7001b",
                     'G1/G2-phase cells' = "#005095",
@@ -379,57 +390,48 @@ diagnostic = function(PerCell,
             on.exit(snow::stopCluster(cl))
 
             # test multiple parameters to correct S phase
-            R_df$distributions = foreach::foreach(
-              a = seq(0.95, 1, by = 0.001),
-              .combine = 'rbind',
-              .export = c("session")
-            ) %dopar% {
-              #load operators
-              `%>%` = tidyr::`%>%`
-              `%do%` = foreach::`%do%`
+            R_df$distributions = foreach::foreach(a = seq(0.95, 1, by = 0.001),
+                                                  .combine = 'rbind') %:%
+              foreach::foreach(b = seq(0.5, 0.55, by = 0.001),
+                               .combine = 'rbind') %dopar% {
+                                 #load operators
+                                 `%>%` = tidyr::`%>%`
+                                 #adjust S-phase based on a and b
+                                 x = isolated_PerCell_subset_2 %>%
+                                   dplyr::filter(Type == 'S-phase cells') %>%
+                                   dplyr::mutate(
+                                     corrected_mean_ploidy = ifelse(
+                                       mean_ploidy >= isolated_median_ploidy_not_noisy_3__diagnostic,
+                                       mean_ploidy / a,
+                                       mean_ploidy / b
+                                     )
+                                   ) %>%
+                                   dplyr::select(corrected_mean_ploidy) %>%
+                                   dplyr::pull()
 
-              dist = foreach::foreach(
-                b = seq(0.5, 0.55, by = 0.001),
-                .combine = 'rbind',
-                .export = c("session")
-              ) %do% {
-                #adjust S-phase based on a and b
-                x = isolated_PerCell_subset_2 %>%
-                  dplyr::filter(Type == 'S-phase cells') %>%
-                  dplyr::mutate(
-                    corrected_mean_ploidy = ifelse(
-                      mean_ploidy >= isolated_median_ploidy_not_noisy_3__diagnostic,
-                      mean_ploidy / a,
-                      mean_ploidy / b
-                    )
-                  ) %>%
-                  dplyr::select(corrected_mean_ploidy) %>%
-                  dplyr::pull()
+                                 # are the data unimodal?
+                                 if (LaplacesDemon::is.unimodal(x)) {
+                                   # d is the distance between theoretical center of the S phase (G1 median ploidy *1.5)
+                                   #and the average ploidy of the corrected S-phase
+                                   # d is divided by sd(x) in order to select parameters that keep the distribution as wide as possible
+                                   dplyr::tibble(
+                                     A = a,
+                                     B = b,
+                                     d = 1 / stats::sd(x),
+                                     unimodal = T
+                                   )
 
-                # are the data unimodal?
-                if (LaplacesDemon::is.unimodal(x)) {
-                  # d is the distance betwen theoretical center of the Sphase (G1 median ploidy *1.5)
-                  #and the average ploidy of the corrected S-phase
-                  # d is devided by sd(x) in order to select parametes that keep the distribution as wide as possible
-                  dplyr::tibble(
-                    A = a,
-                    B = b,
-                    d = 1 / stats::sd(x),
-                    unimodal = T
-                  )
+                                 } else{
+                                   dplyr::tibble(
+                                     A = a,
+                                     B = b,
+                                     d = stats::sd(x),
+                                     unimodal = F
+                                   )
+                                 }
 
-                } else{
-                  dplyr::tibble(
-                    A = a,
-                    B = b,
-                    d = stats::sd(x),
-                    unimodal = F
-                  )
-                }
+                               }
 
-              }
-              dist
-            }
           } else{
             R_df$distributions = dplyr::tibble()
           }
@@ -474,7 +476,7 @@ diagnostic = function(PerCell,
             } else{
               output$parameters_text__diagnostic = renderText(
                 paste(
-                  'S phase correction parameters have been exstimated.\n',
+                  'S phase correction parameters have been estimated.\n',
                   'Parameter first part S phase: ',
                   R_df$distributions$A,
                   '\n',
@@ -690,13 +692,13 @@ diagnostic = function(PerCell,
     ),
     launch.browser = lunch.in.Rstudio)
   } else{
-    #defile results list
+    #define results list
     results = list(
       Settings = dplyr::tibble(
         threshold_Sphase = ifelse(is.null(S_th), NA, S_th),
-        threshold_G1G2phase = ifelse(is.null(G1G2_th), NA, G_th),
+        threshold_G1G2phase = ifelse(is.null(G1G2_th), NA, G1G2_th),
         Sphase_first_part = ifelse(is.null(First_half_factor), 1, First_half_factor),
-        Sphase_second_part = ifelse(is.null(First_half_factor), 1, First_half_factor),
+        Sphase_second_part = ifelse(is.null(Second_half_factor), 1, Second_half_factor),
         Ploidy = NA,
         RPMPH_TH = min_RPMPH,
         RPM_TH = NA,
@@ -713,11 +715,11 @@ diagnostic = function(PerCell,
     #load required operators
     `%>%` = tidyr::`%>%`
     `%dopar%` = foreach::`%dopar%`
-    `%do%` = foreach::`%do%`
+    `%:%` = foreach::`%:%`
 
     if (!is.null(G1G2_th) | !is.null(S_th)) {
-      #if only one treshod is assigne
-      if (is.null(G1G2_th) & !is.null(S_th)) {
+      #if only one threshold is assign
+      if (!is.null(G1G2_th) & is.null(S_th)) {
         S_th = G1G2_th
       } else if (is.null(G1G2_th) & !is.null(S_th)) {
         G1G2_th = S_th
@@ -732,33 +734,47 @@ diagnostic = function(PerCell,
             normalized_dimapd > S_th ~ T,
             normalized_dimapd <= G1G2_th ~ F,
             T ~ is_high_dimapd
+          ),
+          Type = dplyr::case_when(
+            as.logical(is_high_dimapd) == T &
+              as.logical(is_noisy) == T ~ 'S-phase cells',
+            as.logical(is_high_dimapd) == F &
+              as.logical(is_noisy) == F &
+               normalized_dimapd <= G1G2_th ~ 'G1/G2-phase cells',
+            T ~ 'unknown cells'
           )
         )
+
+    } else{
+
+      PerCell = PerCell %>%
+        dplyr::mutate(
+          Type = dplyr::case_when(
+            as.logical(is_high_dimapd) == T &
+              as.logical(is_noisy) == T ~ 'S-phase cells',
+            as.logical(is_high_dimapd) == F &
+              as.logical(is_noisy) == F ~ 'G1/G2-phase cells',
+            T ~ 'unknown cells'
+          ))
+
     }
 
-    #calculate median ploidy of the suppose G1
+    #calculate median ploidy of the supposed G1
     median_ploidy_not_noisy__diagnostic = PerCell %>%
-      dplyr::filter(is_noisy == F) %>%
+      dplyr::filter(Type=='G1/G2-phase cells') %>%
       dplyr::pull(mean_ploidy) %>%
       stats::median()
 
     results$Settings = results$Settings %>%
       dplyr::mutate(Ploidy = median_ploidy_not_noisy__diagnostic,
                     RPM_TH = round(Ploidy * RPMPH_TH))
-    #prepae df
+    #prepare df
     PerCell = PerCell %>%
       dplyr::mutate(
         Type = dplyr::case_when(
-          as.logical(is_high_dimapd) == T &
-            as.logical(is_noisy) == T ~ 'S-phase cells',
-          as.logical(is_high_dimapd) == F &
-            as.logical(is_noisy) == T ~ 'unknown cells',
-          T ~ 'G1/G2-phase cells'
-        ),
-        Type = dplyr::case_when(
           coverage_per_1Mbp < results$Settings$RPM_TH ~ 'Low Coverage',
           ploidy_confidence < 2 &
-            ploidy_confidence != -100 ~ 'Low Ployidy confidence',
+            ploidy_confidence != -100 ~ 'Low ploidy confidence',
           mean_ploidy < median_ploidy_not_noisy__diagnostic / 1.5 ~ 'Too low ploidy compared to G1/G2-phase pool',
           mean_ploidy > median_ploidy_not_noisy__diagnostic * 2 ~ 'Too high ploidy compared to G1/G2-phase pool',
           T ~ Type
@@ -773,7 +789,7 @@ diagnostic = function(PerCell,
       ggplot2::scale_color_manual(
         values = c(
           'Low Coverage' = "#ff7949",
-          'Low Ployidy confidence' = "#70001e",
+          'Low ploidy confidence' = "#70001e",
           'Too low ploidy compared to G1/G2-phase pool' = "#01e7ab",
           'Too high ploidy compared to G1/G2-phase pool' = "#a7001b",
           'G1/G2-phase cells' = "#005095",
@@ -846,8 +862,12 @@ diagnostic = function(PerCell,
                      legend.title = ggplot2::element_blank()) +
       ggplot2::xlab('Ploidy') + ggplot2::ylab('Variability')
 
+    #how many s
+    nS = nrow(PerCell %>%
+                dplyr::filter(Type %in% c('Second-part-S-phase cells','First-part-S-phase cells')))
+
     #automatic correction
-    if (Automatic_correction) {
+    if (Automatic_correction & nS >= 10) {
       # correct mean ploidy
       cl = snow::makeCluster(cores)
       doSNOW::registerDoSNOW(cl)
@@ -855,69 +875,69 @@ diagnostic = function(PerCell,
 
       # test multiple parameters to correct S phase
       distributions = foreach::foreach(a = seq(0.95, 1, by = 0.001),
-                                       .combine = 'rbind') %dopar% {
-                                         #load operators
-                                         `%>%` = tidyr::`%>%`
-                                         `%do%` = foreach::`%do%`
+                                       .combine = 'rbind') %:%
+        foreach::foreach(b = seq(0.5, 0.55, by = 0.001),
+                         .combine = 'rbind') %dopar% {
+                           #adjust S-phase based on a and b
+                           x = PerCell %>%
+                             dplyr::filter(Type %in% c(
+                               'First-part-S-phase cells',
+                               'Second-part-S-phase cells'
+                             )) %>%
+                             dplyr::mutate(
+                               corrected_mean_ploidy = ifelse(
+                                 Type == 'First-part-S-phase cells',
+                                 mean_ploidy / a,
+                                 mean_ploidy / b
+                               )
+                             ) %>%
+                             dplyr::select(corrected_mean_ploidy) %>%
+                             dplyr::pull()
 
-                                         dist = foreach::foreach(b = seq(0.5, 0.55, by = 0.001),
-                                                                 .combine = 'rbind') %do% {
-                                                                   #adjust S-phase based on a and b
-                                                                   x = PerCell %>%
-                                                                     dplyr::filter(Type %in% c(
-                                                                       'First-part-S-phase cells',
-                                                                       'Second-part-S-phase cells'
-                                                                     )) %>%
-                                                                     dplyr::mutate(
-                                                                       corrected_mean_ploidy = ifelse(
-                                                                         Type == 'First-part-S-phase cells',
-                                                                         mean_ploidy / a,
-                                                                         mean_ploidy / b
-                                                                       )
-                                                                     ) %>%
-                                                                     dplyr::select(corrected_mean_ploidy) %>%
-                                                                     dplyr::pull()
+                           # are the data unimodal?
+                           if (LaplacesDemon::is.unimodal(x)) {
+                             # d is the distance between theoretical center of the S-phase (G1 median ploidy *1.5)
+                             #and the average ploidy of the corrected S-phase
+                             # d is divided by sd(x) in order to select parameters that keep the distribution as wide as possible
+                             dplyr::tibble(
+                               A = a,
+                               B = b,
+                               d = 1 / stats::sd(x),
+                               unimodal = T
+                             )
 
-                                                                   # are the data unimodal?
-                                                                   if (LaplacesDemon::is.unimodal(x)) {
-                                                                     # d is the distance betwen theoretical center of the Sphase (G1 median ploidy *1.5)
-                                                                     #and the average ploidy of the corrected S-phase
-                                                                     # d is devided by sd(x) in order to select parametes that keep the distribution as wide as possible
-                                                                     dplyr::tibble(
-                                                                       A = a,
-                                                                       B = b,
-                                                                       d = 1 / stats::sd(x),
-                                                                       unimodal = T
-                                                                     )
+                           } else{
+                             dplyr::tibble(
+                               A = a,
+                               B = b,
+                               d = stats::sd(x),
+                               unimodal = F
+                             )
+                           }
 
-                                                                   } else{
-                                                                     dplyr::tibble(
-                                                                       A = a,
-                                                                       B = b,
-                                                                       d = stats::sd(x),
-                                                                       unimodal = F
-                                                                     )
-                                                                   }
+                         }
 
-                                                                 }
-                                         dist
-                                       }
 
       #select the minimum value of d
       if (nrow(distributions) == 0) {
-        print('Please provide manual ones to fix S-phase progression')
+        print('Please provide manual parameters to fix S-phase progression')
       } else{
         distributions = distributions %>%
           dplyr::filter(unimodal == ifelse(any(unimodal == T), T, F)) %>%
           dplyr::filter(d == min(d))
 
-        if (nrow(distributions) > 1) {
-          print('Please provide manual ones to fix S-phase progression')
-        } else{
+        if (nrow(distributions) != 1) {
+          print('Please provide manual parameters to fix S-phase progression')
+        } else {
           results$Settings$Sphase_first_part = distributions$A
-          results$Settings$Sphase_second_part = distributions$A
+          results$Settings$Sphase_second_part = distributions$B
         }
       }
+
+    } else if (Automatic_correction & nS < 10) {
+      warning(
+        'There are not enough cells identified as S-phase. Automatic correction could not be performed.Please provide manual parameters to fix S-phase progression.'
+      )
     }
     #correct mean ploidy
     PerCell = PerCell %>%
@@ -929,7 +949,7 @@ diagnostic = function(PerCell,
         )
       )
 
-    #corrected S-phase
+    #corrected S phase
     results$fixed_S_phase_plot = PerCell %>%
       ggplot2::ggplot(ggplot2::aes(mean_ploidy,
                                    normalized_dimapd,
@@ -969,7 +989,7 @@ diagnostic = function(PerCell,
 #' @importFrom tidyr %>%
 #'
 #' @param PerCell, per cell dataframe from CallCNV
-#' @param WhoIsWho, dataframe containing two colums: Cell (character) and S_Phase (logical)
+#' @param WhoIsWho, dataframe containing two columns: Cell (character) and S_Phase (logical)
 #'
 #' @export
 

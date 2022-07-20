@@ -343,8 +343,8 @@ ui <- shinydashboard::dashboardPage(
                                   'hw_BinRep',
                                   right = F,
                                   up = F,
-                                  height = 7,
-                                  width = 14
+                                  height = 14,
+                                  width = 28
                                 )
                               )
                             )),

@@ -2,7 +2,7 @@
 #'
 #' @return a string informing the user file format is the required one
 #'
-#' @importFrom  readr read_delim
+#' @importFrom  readr read_delim cols
 #' @importFrom  dplyr tibble
 #'
 #' @param dirs, list of directories

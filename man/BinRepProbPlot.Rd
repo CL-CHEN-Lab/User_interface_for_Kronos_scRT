@@ -17,7 +17,7 @@ BinRepProbPlot(
 
 \item{upper_range, }{limits of the upper panel}
 
-\item{lower_range, }{limits of the upper panel}
+\item{lower_range, }{limits of the lower panel}
 
 \item{relative_heights, }{relative heights between the 3 panels}
 

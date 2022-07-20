@@ -751,7 +751,7 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder,colors, cores = 3) 
                                   data_subpop$dbclick =  1
                                   data_subpop$click = 1
                                   data_subpop$poligon = dplyr::tibble()
-                                  data_subpop$summary = dplyr::tibble()
+                                  data_subpop$summary = dplyr::tibble(Phase= character())
 
                                   shinyWidgets::updateSwitchInput(
                                     inputId = 'AssignGroups_subpop',
@@ -1019,6 +1019,7 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder,colors, cores = 3) 
 
                           } else{
                             data_subpop = shiny::reactiveValues(
+                              data=dplyr::tibble(Phase = character()),
                               counter = 1,
                               G1 = NULL,
                               S = NULL,
@@ -1027,7 +1028,7 @@ Dim_red_sub_pop_server = function(id, scCN, out, Inputfolder,colors, cores = 3) 
                               click = 1,
                               dbclick = 1,
                               poligon = dplyr::tibble(),
-                              summary = dplyr::tibble(Phase = NA)
+                              summary = dplyr::tibble(Phase = character())
                             )
 
                             shinyWidgets::updateSwitchInput(inputId = 'AssignGroups_subpop',

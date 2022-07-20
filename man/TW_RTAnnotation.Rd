@@ -9,7 +9,7 @@ TW_RTAnnotation(Variability, RT_Groups = 2)
 \arguments{
 \item{Variability, }{dataframe created by Kronos}
 
-\item{RT_Groups, }{number of RT groups}
+\item{RT_Groups, }{number of RT groups (1,2,3,5)}
 }
 \description{
 Annotate Variability dataframe based on RT Categories

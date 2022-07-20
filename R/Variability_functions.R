@@ -38,7 +38,7 @@ Twidth = function(df) {
 #'
 #' @export
 #'
-#' @param df, dataframe containing the colums group and category
+#' @param df, dataframe containing the columns group and category
 #' @param cores, number of cores for parallelization
 #'
 #'
@@ -46,9 +46,9 @@ Twidth = function(df) {
 Twidth_fit_data = function(df, ncores = 1) {
   df = Kronos.scRT::AverageVariability(df)
 
-  #load required functions
+  #load required operators
   `%dopar%` = foreach::`%dopar%`
-
+  `%:%` = foreach::`%:%`
   #declare clusters
   cl <- snow::makeCluster(ncores)
   doSNOW::registerDoSNOW(cl)
@@ -58,15 +58,19 @@ Twidth_fit_data = function(df, ncores = 1) {
     cat = unique(df$category),
     .combine = 'rbind',
     .errorhandling = 'remove'
-  ) %dopar% {
-    Kronos.scRT::T25_75(df = df[df$category == cat, ], unique(df$group), cat)
+  ) %:%foreach::foreach(
+    Group = unique(df$group),
+    .combine = 'rbind',
+    .errorhandling = 'remove'
+  )%dopar% {
+    Kronos.scRT::T25_75(df = df[df$category == cat & df$group == Group, ], Group, cat)
   }
 
   return(fitted_data)
 
 }
 
-#' fit RT data into sigmoidal function and return T25 and T75
+#' fit RT data into sigmoid function and return T25 and T75
 #'
 #' @return tibble
 #' @importFrom dplyr mutate select add_row
@@ -148,14 +152,14 @@ T25_75 = function(df, sample, category) {
   return(t)
 }
 
-#' given an RT value (Early == 1 and Late == 0), this function returns its RT category base on the number of categores to return (2,3 or 5)
+#' given an RT value (Early == 1 and Late == 0), this function returns its RT category base on the number of categories to return (2,3 or 5)
 #'
-#' @return a string or a vactor of strings
+#' @return a string or a vector of strings
 #' @importFrom dplyr case_when
 #'
 #' @export
 #'
-#' @param RT, a number of a vector of nubers
+#' @param RT, a number of a vector of numbers
 #' @param number, number of categories to create
 #' @param ..., other parameters that can be passed to Rtsne
 #'
@@ -186,33 +190,34 @@ split_into_categoreis = Vectorize(function(RT, number = 2) {
   }
 }, vectorize.args = 'RT')
 
-#' Order in which RT categoris should be plot
+#' Order in which RT categories should be plot
 #'
 #' @return character vector
 #'
 #' @export
 #'
-#' @param number, number of categores (2,3 or 5)
+#' @param number, number of categories (2,3 or 5)
 #'
 #'
 
 cat_levels = function(number) {
   if (number == 3) {
-    return(c('All',
-             'Early',
+    return(c('Early',
              'Mid',
              'Late'))
   } else if (number == 5) {
-    return(c('All',
-             'Very Early',
+    return(c('Very Early',
              'Early',
              'Mid',
              'Late',
              'Very Late'))
-  } else {
-    return(c('All',
-             'Early',
+  } else if (number == 2) {
+    return(c('Early',
              'Late'))
+  }else if (number == 1) {
+    return(c('All'))
+  }else{
+    stop('Allowed number of categories: 1,2,3 and 5.')
   }
 }
 
@@ -225,17 +230,17 @@ cat_levels = function(number) {
 #' @param Variability, dataframe created by either TW_RTAnnotation or TW_GenomeAnnotation
 #' @param Fitted_data, dataframe creted by Twidth_fit_data
 #' @param Twidth, dataframe created by Twidth
+#' @param Color, plot color (s)
 #'
 #'
 
-Twidth_extended_plot = function(Variability, Fitted_data, Twidth) {
+Twidth_extended_plot = function(Variability, Fitted_data, Twidth, Color='red') {
   #calculate average variability
   Variability = Kronos.scRT::AverageVariability(Variability)
 
   #plot
   plot = ggplot2::ggplot(Variability) +
-    ggplot2::geom_point(ggplot2::aes(time, percentage), color =
-                          'red') +
+    ggplot2::geom_point(ggplot2::aes(time, percentage), color = Color) +
     ggplot2::geom_line(data = Fitted_data,
                        ggplot2::aes(time, percentage),
                        color = 'blue') +
@@ -254,8 +259,7 @@ Twidth_extended_plot = function(Variability, Fitted_data, Twidth) {
       y = 0.5,
       hjust = 1.25
     ) +
-    ggplot2::facet_grid(~ category) +
-    ggplot2::theme(aspect.ratio = 1)
+    ggplot2::facet_grid( ~ category)
 
   return(plot)
 }
@@ -270,12 +274,13 @@ Twidth_extended_plot = function(Variability, Fitted_data, Twidth) {
 #' @export
 #'
 #' @param Variability, dataframe created by either TW_RTAnnotation or TW_GenomeAnnotation
-#' @param Fitted_data, dataframe creted by Twidth_fit_data
 #' @param Twidth, dataframe created by Twidth
+#' @param Color, barplot color(s)
+#' @param pval, dataframe produced by twidth_pval
 #'
 #'
 
-Twidth_barplot = function(Variability, Twidth) {
+Twidth_barplot = function(Variability, Twidth,Color='lightblue',pval=NULL) {
   #load operator
   `%>%` = tidyr::`%>%`
 
@@ -289,17 +294,15 @@ Twidth_barplot = function(Variability, Twidth) {
       dplyr::summarise(`N of bins` = n()),
     by = c('group', 'category')
   )
-  #plots
+  #plot
   p = ggplot2::ggplot(Twidth) +
     ggplot2::geom_col(ggplot2::aes(category, Twidth),
                       position = 'dodge',
-                      fill = 'lightblue') +
+                      fill = Color) +
     ggplot2::ylab('Twidth') + ggplot2::xlab('') +
     ggplot2::theme(
       axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
-      legend.position = 'none',
-      aspect.ratio = 2 / length(unique(Twidth$category))
-    ) +
+      legend.position = 'none') +
     ggplot2::geom_text(
       ggplot2::aes(category, Twidth / 2, label = paste0('n bins:\n', `N of bins`)),
       angle = 90,
@@ -307,12 +310,57 @@ Twidth_barplot = function(Variability, Twidth) {
       vjust = 0.5
     ) +
     ggplot2::geom_text(aes(category, Twidth, label = paste0('Twidth: ', Twidth)),
-                       vjust = -1.25)
+                       vjust = -0.25)
+
+  if(!is.null(pval)){
+    pval=pval%>%
+      dplyr::mutate(a=as.numeric(category1),
+                    b=as.numeric(category2),
+                    position=(a+b)/2,
+                    x=ifelse(a>b,b,a),
+                    xend=ifelse(a<b,b,a),
+                    pval_label = tryCatch(
+                      format(
+                        adj_pval,
+                        digits = 2,
+                        scientific = T
+                      ),
+                      error=function(x)
+                        format(
+                          pval,
+                          digits = 2,
+                          scientific = T
+                        )
+                    ),
+                    Statistically=ifelse(
+                      tryCatch(
+                        adj_pval < 0.05 & iterations > 2000,
+                        error=function(x)
+                          pval < 0.05 & iterations > 2000
+                      ),
+                      'Significant',
+                      'Non-significant')
+      )%>%
+      dplyr::group_by(group)%>%
+      dplyr::mutate( y=seq(1.1*max(Twidth$Twidth),(1+dplyr::n()/10)*max(Twidth$Twidth),length.out = dplyr::n()))%>%
+      dplyr::ungroup()
+
+    p=p+
+      ggplot2::geom_text(data=pval, ggplot2::aes(x=position,y=y,label=pval_label,color=Statistically),vjust=-0.25)+
+      ggplot2::geom_segment(data=pval,ggplot2::aes(
+        x=x,
+        xend=xend,
+        y=y,
+        yend=y,color=Statistically))+
+      ggplot2::scale_color_manual(values = c('Significant'='red','Non-significant'='black'))+
+      ggplot2::theme(legend.position = 'top')+
+      ggplot2::labs(color='')
+    }
 
   return(p)
 }
 
-#' Calculates the proportion of bins replicated in function of time
+#' Calculates the proportion of replicated bins in function of time
 #'
 #' @return ggplot element
 #'
@@ -336,7 +384,7 @@ AverageVariability = function(Variability) {
 }
 
 
-#' Annotate Variability dataframe with a costumized annotation
+#' Annotate Variability dataframe with a customized annotation
 #'
 #' @importFrom dplyr group_by mutate summarise ungroup select as_tibble bind_rows inner_join
 #' @importFrom tidyr %>%
@@ -346,7 +394,7 @@ AverageVariability = function(Variability) {
 #' @export
 #'
 #' @param Variability, dataframe created by Kronos
-#' @param GenomeAnnotation, a dataFrame containing chr, start, end and annotation colums.
+#' @param GenomeAnnotation, a dataFrame containing chr, start, end and annotation columns.
 #'
 
 
@@ -378,7 +426,7 @@ TW_GenomeAnnotation = function(Variability,
   #find overlaps
   hits = IRanges::findOverlaps(Bin, GenomeAnnotation)
 
-  #info about overlapping regins
+  #info about overlapping regions
   overlaps <-
     IRanges::pintersect(GenomeAnnotation[S4Vectors::subjectHits(hits)], Bin[S4Vectors::queryHits(hits)])
 
@@ -387,7 +435,7 @@ TW_GenomeAnnotation = function(Variability,
   not_add = dplyr::as_tibble(Bin[-S4Vectors::queryHits(hits)])
 
   #Based on the overlap define the predominant notation of each bin.
-  #A category to be chosen has to be predominant (at least 60% of the tatal overlaps in the bin)
+  #A category to be chosen has to be predominant (at least 60% of the total overlaps in the bin)
   Annotation = dplyr::bind_rows(
     add %>%
       dplyr::mutate(
@@ -426,14 +474,14 @@ TW_GenomeAnnotation = function(Variability,
 #' @export
 #'
 #' @param Variability, dataframe created by Kronos
-#' @param RT_Groups, number of RT groups
+#' @param RT_Groups, number of RT groups (1,2,3,5)
 #'
 
 TW_RTAnnotation = function(Variability, RT_Groups = 2) {
   #load operator
   `%>%` = tibble::`%>%`
 
-  #assigne bins to RT groups
+  #assign bins to RT groups
   if (RT_Groups == 1) {
     Variability = Variability %>%
       dplyr::mutate(category = factor('All'))
@@ -446,4 +494,181 @@ TW_RTAnnotation = function(Variability, RT_Groups = 2) {
       )
   }
   return(Variability)
+}
+
+#' Hypothesis test between different RT categories inside a sample
+#'
+#'
+#' @importFrom dplyr mutate tibble filter pull select inner_join
+#' @importFrom tidyr %>%
+#' @importFrom foreach %do% %:% %dopar% foreach
+#' @importFrom  doSNOW registerDoSNOW
+#' @importFrom snow makeCluster stopCluster
+#' @export
+#'
+#' @param Variability, dataframe created by Kronos
+#' @param twidth,  dataframe created by Twidth
+#' @param pairs_to_test, a dataframe containing the columns Category1, Category2 to test
+#' @param adjust.methods, correction method. Can be abbreviated. by default it is set as none
+#' @param alternative, Hypothesis test. If pairs_to_test is null it is always two.sided
+#' @param nIterations, number of iterations
+#' @param ncores, number of cores for parallelization
+#'
+
+
+Twidth_pval = function(variability,
+                       twidth,
+                       pairs_to_test = NULL,
+                       adjust.methods = c("none","holm", "hochberg", "hommel", "bonferroni", "BH", "BY",
+                                        "fdr"),
+                       alternative = c('two.sided', 'greater', 'lower'),
+                       nIterations = 10 ^ 4,
+                       ncores = 3) {
+
+  #define operators
+  `%>%` = tidyr::`%>%`
+  `%do%` = foreach::`%do%`
+  `%dopar%` = foreach::`%dopar%`
+  `%:%` = foreach::`%:%`
+  #identify pairs to test
+  if (is.null(pairs_to_test)) {
+    #if pairs to test is not set alternative must be two.sided
+    if (alternative != 'two.sided') {
+      alternative = 'two.sided'
+      warning('Since pairs_to_test is null, alternative has been set to two.sided')
+    }
+    # if not provided create all possible combinations
+    pairs_to_test = sort(unique(twidth$category))
+
+    pairs_to_test = foreach::foreach(i = 1:(length(pairs_to_test) - 1), .combine = 'rbind') %:%
+      foreach::foreach(h = (i + 1):length(pairs_to_test),
+                       .combine = 'rbind') %do%
+      {
+        dplyr::tibble(Category1 = pairs_to_test[i],
+                      Category2 = pairs_to_test[h])
+
+      }
+
+  }
+
+  # base of the input invert the order of element or calculate absolute
+  stat_type = function(what, x, y) {
+    return(switch (
+      what,
+      'greater' = x - y,
+      'lower' = y - x,
+      'two.sided' = abs(y - x),
+      stop('wrong alternative hypotesys provided')
+    ))
+  }
+
+  pval = foreach::foreach(g = unique(variability$group),
+                          .combine = 'rbind') %:%
+    foreach::foreach (
+      i = 1:nrow(pairs_to_test),
+      .combine = 'rbind' ,
+      .errorhandling = "remove"
+    ) %do% {
+      #calculate real difference between two categories inside a group
+      Real_difference = stat_type(
+        alternative,
+        twidth %>%
+          dplyr::filter(category == pairs_to_test$Category1[i],
+                        group == g) %>%
+          dplyr::pull(Twidth),
+        twidth %>%
+          dplyr::filter(category == pairs_to_test$Category2[i],
+                        group == g) %>%
+          dplyr::pull(Twidth)
+      )
+
+      Variabilit_to_test = variability %>%
+        dplyr::filter(
+          category == pairs_to_test$Category1[i] |
+            category == pairs_to_test$Category2[i],
+          group == g
+        )
+
+      Bins = Variabilit_to_test %>%
+        dplyr::select(chr, start, end, category) %>%
+        unique()
+
+      Variabilit_to_test$category = NULL
+
+      #n of bins in each category
+      nCat1= Bins%>%dplyr::filter(category==pairs_to_test$Category1[i])%>%nrow()
+      nCat2= Bins%>%dplyr::filter(category==pairs_to_test$Category2[i])%>%nrow()
+
+      #start cluster and permutate
+      cl <- snow::makeCluster(ncores)
+      doSNOW::registerDoSNOW(cl)
+      on.exit(snow::stopCluster(cl))
+
+      Boot_Strapped = foreach::foreach(
+        index = 1:(nIterations-1),
+        .combine = '+',
+        .errorhandling = "remove"
+      ) %dopar% {
+        #define operators
+        `%>%`=tidyr::`%>%`
+
+        #shuffle categories
+        Bins_perm = rbind(Bins[sample(1:nrow(Bins),size = nCat1,replace = T),]%>%
+            dplyr::mutate(category=pairs_to_test$Category1[i]),
+            Bins[sample(1:nrow(Bins),size = nCat2,replace = T),]%>%
+              dplyr::mutate(category=pairs_to_test$Category2[i])
+          )
+
+        Variabilit_to_test_perm = Variabilit_to_test %>%
+          dplyr::inner_join(Bins_perm, by = c("chr", "start", "end"))
+
+
+        #fit data
+        twidth_fitted_data_perm = Kronos.scRT::Twidth_fit_data(df = Variabilit_to_test_perm,
+                                                          ncores = 1)
+
+        #calculate TW
+        twidth_perm = Kronos.scRT::Twidth(twidth_fitted_data_perm)
+
+        c(
+          stat_type(
+            alternative,
+            twidth_perm %>%
+              dplyr::filter(category == pairs_to_test$Category1[i],
+                            group == g) %>%
+              dplyr::pull(Twidth),
+            twidth_perm %>%
+              dplyr::filter(category == pairs_to_test$Category2[i],
+                            group == g) %>%
+              dplyr::pull(Twidth)
+          ) >=
+            Real_difference,
+          1
+        )
+
+
+      }
+
+      #return pvalues
+      dplyr::tibble(
+        group = g,
+        category1 = pairs_to_test$Category1[i],
+        category2 = pairs_to_test$Category2[i],
+        #calculate pvalue over effective iterations
+        pval = (Boot_Strapped[1] + 1) / (Boot_Strapped[2] + 1),
+        # actual iterations
+        iterations = Boot_Strapped[2] + 1
+      )
+    }
+
+  if(adjust.methods=='none'){
+      return(pval)
+  }else{
+
+    pval%>%
+      dplyr::mutate(adj.pval=p.adjust(pval,method = adjust.methods))%>%
+      dplyr::select(group,category1,category2,pval,adj.pval,iterations)%>%
+      return()
+    }
+
 }

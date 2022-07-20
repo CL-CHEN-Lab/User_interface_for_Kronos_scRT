@@ -133,7 +133,7 @@ RT_changes_plot = function(...,
           later = later - crossing_later
 
           dplyr::tibble(
-            Group = paste('ΔRT =', a, '-', b),
+            Group = paste0('ΔRT = (', a, ') - (', b,')'),
             deltaRT = deltaRT,
             change = c('to Earlier', 'to Later', 'Late to Early', 'Early to Late'),
             percent = c(earlier, later, crossing_earlier, crossing_later)

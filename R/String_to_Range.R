@@ -1,11 +1,11 @@
-#' converts a strin representing a range of values into an array of integers
+#' converts a string representing a range of values into an array of integers
 #'
 #' @return an array of integers ranging from the first to the last number in the string
 #'
 #' @importFrom  stringr str_detect str_split
 #'
 #' @param x, a string
-#' @param div, symbol used to indicate a ragnge
+#' @param div, symbol used to indicate a range
 #'
 #'@export
 #'

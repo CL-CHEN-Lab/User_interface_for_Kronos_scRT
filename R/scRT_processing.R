@@ -27,8 +27,8 @@ GenomeBinning <-
     `%>%` = tidyr::`%>%`
 
     #filter
-    if(!is.null(Chr_filter)){
-      Chr_size=Chr_size%>%
+    if (!is.null(Chr_filter)) {
+      Chr_size = Chr_size %>%
         dplyr::filter(chr %in% Chr_filter)
     }
 
@@ -41,8 +41,7 @@ GenomeBinning <-
     #create bins
     bins = foreach::foreach(
       chr = 1:nrow(Chr_size),
-      .combine = 'rbind',
-      .packages = 'dplyr'
+      .combine = 'rbind'
     ) %dopar% {
       bins = seq(from = size,
                  to = Chr_size$size[chr] ,
@@ -94,28 +93,24 @@ AdjustPerCell <-
 
     #convert basename and group to factors
 
-    if(is.null(Basename_leves)){
+    if (is.null(Basename_leves)) {
       PerCell = PerCell %>%
-        dplyr::mutate(
-          basename = factor(basename,
-                            levels = sort(unique(basename))))
-    }else{
+        dplyr::mutate(basename = factor(basename,
+                                        levels = sort(unique(basename))))
+    } else{
       PerCell = PerCell %>%
-        dplyr::mutate(
-          basename = factor(basename,
-                            levels = Basename_leves))
+        dplyr::mutate(basename = factor(basename,
+                                        levels = Basename_leves))
     }
 
-    if(is.null(Group_leves)){
+    if (is.null(Group_leves)) {
       PerCell = PerCell %>%
-        dplyr::mutate(
-          group = factor(group,
-                            levels = sort(unique(group))))
-    }else{
+        dplyr::mutate(group = factor(group,
+                                     levels = sort(unique(group))))
+    } else{
       PerCell = PerCell %>%
-        dplyr::mutate(
-          group = factor(group,
-                            levels = Group_leves))
+        dplyr::mutate(group = factor(group,
+                                     levels = Group_leves))
     }
 
     PerCell = PerCell %>%
@@ -156,7 +151,7 @@ AdjustPerCell <-
                 normalized_dimapd < threshold_G1G2phase
             ),
             'G1/G2-phase cells',
-            # other cells are unkwnown
+            # other cells are unknown
             'unknown cells'
           )
         ),
@@ -183,7 +178,7 @@ AdjustPerCell <-
 #' @param PerCell, PerCell dataframe created by AdjustPerCell
 #' @param Basename_leves, Sample basenames order (optional)
 #' @param Group_leves, Group basenames order (optional)
-#' @param Chr_filter, filters chromosomes to keep in the analisys (optional)
+#' @param Chr_filter, filters chromosomes to keep in the analysis (optional)
 #'
 #' @export
 #'
@@ -197,44 +192,38 @@ AdjustCN <-
     #load required operators
     `%>%` = tidyr::`%>%`
     #assign levels
-    if(is.null(Basename_leves)){
+    if (is.null(Basename_leves)) {
       scCN = scCN %>%
-        dplyr::mutate(
-          basename = factor(basename,
-                            levels = sort(unique(basename))))
-    }else{
+        dplyr::mutate(basename = factor(basename,
+                                        levels = sort(unique(basename))))
+    } else{
       scCN = scCN %>%
-        dplyr::mutate(
-          basename = factor(basename,
-                            levels = Basename_leves))
+        dplyr::mutate(basename = factor(basename,
+                                        levels = Basename_leves))
     }
-    if(is.null(Group_leves)){
+    if (is.null(Group_leves)) {
       scCN = scCN %>%
-        dplyr::mutate(
-          group = factor(group,
-                         levels = sort(unique(group))))
-    }else{
+        dplyr::mutate(group = factor(group,
+                                     levels = sort(unique(group))))
+    } else{
       scCN = scCN %>%
-        dplyr::mutate(
-          group = factor(group,
-                         levels = Group_leves))
+        dplyr::mutate(group = factor(group,
+                                     levels = Group_leves))
     }
-    if(is.null(Chr_filter)){
+    if (is.null(Chr_filter)) {
       scCN = scCN %>%
-        dplyr::mutate(
-          chr = factor(chr,
-                         levels = sort(unique(chr))))
-    }else{
+        dplyr::mutate(chr = factor(chr,
+                                   levels = sort(unique(chr))))
+    } else{
       scCN = scCN %>%
-        dplyr::mutate(
-          chr = factor(chr,
-                         levels = Chr_filter))
+        dplyr::mutate(chr = factor(chr,
+                                   levels = Chr_filter))
     }
 
     scCN = scCN %>%
       #drop na
       tidyr::drop_na() %>%
-      #join with Cell and basename colums from Per cell to filter cells to use
+      #join with Cell and basename columns from Per cell to filter cells to use
       dplyr::inner_join(
         PerCell %>% dplyr::select(
           Cell,
@@ -284,6 +273,7 @@ Rebin <- function(PerCell, scCN, Bins, Sphase = NULL) {
     stop('Sphase must be set as True or False')
   }
 
+  #filter data
   if (Sphase) {
     selected_data = PerCell %>%
       dplyr::filter(Type == 'S-phase cells') %>%
@@ -293,7 +283,6 @@ Rebin <- function(PerCell, scCN, Bins, Sphase = NULL) {
                     Cell,
                     basename,
                     group)
-
   } else{
     selected_data = PerCell %>%
       dplyr::filter(Type == 'G1/G2-phase cells') %>%
@@ -329,16 +318,14 @@ Rebin <- function(PerCell, scCN, Bins, Sphase = NULL) {
                                                       w = width,
                                                       na.rm = T)) %>%
     dplyr::ungroup() %>%
-    dplyr::select(
-      chr,
-      start,
-      end,
-      CN,
-      Cell,
-      basename,
-      group,
-      index
-    )
+    dplyr::select(chr,
+                  start,
+                  end,
+                  CN,
+                  Cell,
+                  basename,
+                  group,
+                  index)
 
   return(scCN)
 }
@@ -356,7 +343,7 @@ Rebin <- function(PerCell, scCN, Bins, Sphase = NULL) {
 #'
 #' @param RT, RT dataframe (chr,start,end,RT)
 #' @param Bins, a GenomicRanges object with genomic binning
-#' @param Chr_filter, filters chromosomes to keep in the analisys
+#' @param Chr_filter, filters chromosomes to keep in the analysis
 #'
 #' @export
 #'
@@ -390,7 +377,7 @@ RebinRT <-
       )
 
     hits = IRanges::findOverlaps(Bins, RT)
-
+    # calculate weighted median RT on new bins
     RT = cbind(
       dplyr::as_tibble(Bins[S4Vectors::queryHits(hits)]) %>% dplyr::select('chr' =
                                                                              seqnames, start, end) ,
@@ -405,21 +392,19 @@ RebinRT <-
 
 
 
-#Assign level
-    if(is.null(Chr_filter)){
+    #Assign level
+    if (is.null(Chr_filter)) {
       RT = RT %>%
-        dplyr::mutate(
-          chr = factor(chr,
-                         levels = sort(unique(chr))))
-    }else{
+        dplyr::mutate(chr = factor(chr,
+                                   levels = sort(unique(chr))))
+    } else{
       RT = RT %>%
-        dplyr::mutate(
-          chr = factor(chr,
-                         levels = Chr_filter))
+        dplyr::mutate(chr = factor(chr,
+                                   levels = Chr_filter))
     }
 
-
-    RT = RT%>%
+    #resize RT
+    RT = RT %>%
       dplyr::mutate(RT = (RT - min(RT)) / (max(RT) - min(RT))) %>%
       dplyr::ungroup() %>%
       tidyr::drop_na()
@@ -462,8 +447,8 @@ BackGround <- function(G1_scCN) {
 #' @importFrom doSNOW registerDoSNOW
 #'
 #' @param Samples, a dataframe containing scCN info with the following columns:chr, start, end, group, basename, CN, index
-#' @param background, a dataframe containing the meadian scCN info of the G1/G2 population with the following columns:chr, start, end, group, basename, background
-#' @param Chr_filter, filters chromosomes to keep in the analisys
+#' @param background, a dataframe containing the median scCN info of the G1/G2 population with the following columns:chr, start, end, group, basename, background
+#' @param Chr_filter, filters chromosomes to keep in the analysis
 #' @param cores, number of threads to use while to parallelise
 #'
 #' @export
@@ -478,26 +463,22 @@ Replication_state = function(Samples,
   `%do%` = foreach::`%do%`
   `%>%` = tidyr::`%>%`
 
-  #declair cluster
+  #declare cluster
   cl <- snow::makeCluster(cores)
   doSNOW::registerDoSNOW(cl)
   on.exit(snow::stopCluster(cl))
 
-  #assigne factors
-  if(is.null(Chr_filter)){
+  #assign factors
+  if (is.null(Chr_filter)) {
     Samples = Samples %>%
       dplyr::ungroup() %>%
-      dplyr::mutate(chr = factor(
-        x =  chr,
-        levels =  sort(unique(chr))
-      ))
-  }else{
+      dplyr::mutate(chr = factor(x =  chr,
+                                 levels =  sort(unique(chr))))
+  } else{
     Samples = Samples %>%
       dplyr::ungroup() %>%
-      dplyr::mutate(chr = factor(
-        x =  chr,
-        levels =  Chr_filter
-      ))
+      dplyr::mutate(chr = factor(x =  chr,
+                                 levels =  Chr_filter))
   }
 
   #merge signal and bg and calculate their ratio
@@ -508,7 +489,7 @@ Replication_state = function(Samples,
     tidyr::drop_na() %>%
     dplyr::filter(is.finite(CN_bg))
 
-  # identify threshold that minimazes the difference of the real data with a binary state (1 or 2)
+  # identify threshold that minimizes the difference of the real data with a binary state (1 or 2)
   selecte_th = foreach::foreach(line = unique(Samples$basename),
                                 .combine = 'rbind') %dopar% {
                                   #load required operators
@@ -518,13 +499,12 @@ Replication_state = function(Samples,
                                   sub_sig = Samples %>%
                                     dplyr::filter(basename == line)
 
-                                  #identify range within looking for a CNV treshold to define replicated and not replicated values
+                                  #identify range within looking for a CNV threshold to define replicated and not replicated values
                                   range = seq(0, 1, 0.01)
 
                                   th_temp = foreach::foreach(
                                     i = range,
-                                    .combine = 'rbind',
-                                    .packages = c('dplyr', 'tidyr')
+                                    .combine = 'rbind'
                                   ) %do% {
                                     summary = sub_sig %>%
                                       dplyr::mutate(Rep = ifelse(CN_bg >= i, T, F),
@@ -553,7 +533,7 @@ Replication_state = function(Samples,
     dplyr::inner_join(selecte_th, by = c("index", "basename")) %>%
     dplyr::mutate(Rep = ifelse(CN_bg >= th, T, F))
 
-  #identify new distribution in the S phase based the ammount of replicated bins
+  #identify new distribution in the S phase based the amount of replicated bins
   new_index_list = Samples %>%
     dplyr::group_by(Cell, index, basename, group) %>%
     dplyr::summarise(PercentageReplication = mean(Rep)) %>%
@@ -589,16 +569,17 @@ Replication_state = function(Samples,
 #' @importFrom matrixStats rowQuantiles
 #' @importFrom stringr str_remove
 #' @importFrom tibble column_to_rownames
+#' @importFrom gplots heatmap.2
 #'
 #' @param scCN, scCN dataframe from Replication_state function
 #' @param min_cor, min correlation to be kept
-#'
+#' @param save_plot_name, if provided the function saves plots instead of returning them
 #' @export
 #'
 
 FilterCells <- function(scCN,
                         min_cor = 0.25,
-                        ApplyFilter = F) {
+                        save_plot_basename = NULL) {
   #load required operators
   `%do%` = foreach::`%do%`
   `%>%` = tidyr::`%>%`
@@ -628,7 +609,8 @@ FilterCells <- function(scCN,
     upper = T
   ))
 
-  basenames = dplyr::tibble(Group = stringr::str_remove(colnames(mat), ' _ [0-9]{1,10}$'))
+  basenames = dplyr::tibble(Group = stringr::str_remove(colnames(mat), ' _ [0-9]{1,10}$'))%>%
+    dplyr::mutate(Group=factor(Group))
 
   #prepare color patterns
   color = grDevices::colorRampPalette(
@@ -643,21 +625,48 @@ FilterCells <- function(scCN,
     )
   )
 
-  Plot1 <-
-    heatmaply::heatmaply(
-      x = results,
-      colors = color,
-      dendrogram = F,
-      showticklabels = F,
-      row_side_colors = basenames,
-      col_side_colors = basenames,
-      limits = c(0, 1)
-    ) %>%
-    plotly::layout(
-      showlegend = FALSE,
-      legend = FALSE,
-      annotations = list(visible = FALSE)
+  if (is.null(save_plot_basename)) {
+    Plot1 <-
+      heatmaply::heatmaply(
+        x = results,
+        colors = color,
+        dendrogram = F,
+        showticklabels = F,
+        row_side_colors = basenames,
+        col_side_colors = basenames,
+        limits = c(0, 1)
+      ) %>%
+      plotly::layout(
+        showlegend = FALSE,
+        legend = FALSE,
+        annotations = list(visible = FALSE)
+      )
+  } else{
+    selcol <- colorRampPalette(RColorBrewer::brewer.pal(8, "Set1"))
+    color_basenames = selcol(length(unique(basenames$Group)))
+
+    jpeg(filename = paste0(
+      save_plot_basename,
+      '_correlation_plot_before_filter.jpeg'
+    ),width = 800,height = 800)
+    gplots::heatmap.2(
+      results,
+      trace = "none",
+      dendrogram = 'none',
+      Colv = F,
+      Rowv = F,
+      breaks = seq(0, 1, length.out = 101),
+      col = color(100),
+      density.info =  'density',
+      keysize = 1,
+      key.title = 'Simple matching coefficient',
+      RowSideColors = color_basenames[as.numeric(basenames$Group)],
+      ColSideColors = color_basenames[as.numeric(basenames$Group)],
+      labRow = FALSE,
+      labCol = FALSE
     )
+    dev.off()
+  }
 
   to_keep = foreach::foreach(i = unique(basenames$Group)) %do% {
     sub_mat = results[basenames$Group == i, basenames$Group == i]
@@ -671,70 +680,93 @@ FilterCells <- function(scCN,
   results_after_filtering = results[to_keep, to_keep]
   basenames_after_filtering = basenames[to_keep, ]
 
-  Plot2 <-
-    heatmaply::heatmaply(
-      x = results_after_filtering,
-      colors = color,
-      dendrogram = F,
-      showticklabels = F,
-      row_side_colors = basenames_after_filtering,
-      col_side_colors = basenames_after_filtering,
-      limits = c(0, 1)
-    ) %>%
-    plotly::layout(
-      showlegend = FALSE,
-      legend = FALSE,
-      annotations = list(visible = FALSE)
-    )
-
-
-  if (ApplyFilter) {
-    #filter out samples that don't correlate and save
-    scCN = scCN %>%
-      dplyr::filter(index %in% Index) %>%
-      tidyr::separate(index, c('group', 'index'), sep = ' _ ')
-
-    rep_percentage = scCN %>%
-      dplyr::group_by(Cell, basename, group, index) %>%
-      dplyr::summarise(Rep_percentage = mean(Rep))
-
-    #new index
-    new_index_list = rep_percentage %>%
-      dplyr::ungroup() %>%
-      dplyr::arrange(Rep_percentage) %>%
-      dplyr::group_by(group) %>%
-      dplyr::mutate(newIndex = 1:dplyr::n()) %>%
-      dplyr::arrange(group, newIndex) %>%
-      dplyr::select(oldIndex = index, newIndex, Cell, basename, group)
-
-    scCN = scCN %>%
-      dplyr::ungroup() %>%
-      dplyr::inner_join(new_index_list,
-                        by = c('Cell', 'index' = 'oldIndex', 'basename', 'group')) %>%
-      dplyr::select(
-        chr,
-        start,
-        end,
-        CN,
-        background,
-        CN_bg,
-        th,
-        Rep,
-        PercentageReplication,
-        Cell,
-        basename,
-        group,
-        newIndex
+  if (is.null(save_plot_basename)) {
+    Plot2 <-
+      heatmaply::heatmaply(
+        x = results_after_filtering,
+        colors = color,
+        dendrogram = F,
+        showticklabels = F,
+        row_side_colors = basenames_after_filtering$Group,
+        col_side_colors = basenames_after_filtering$Group,
+        limits = c(0, 1)
+      ) %>%
+      plotly::layout(
+        showlegend = FALSE,
+        legend = FALSE,
+        annotations = list(visible = FALSE)
       )
   } else{
-    scCN = NULL
+    jpeg(filename = paste0(
+      save_plot_basename,
+      '_correlation_plot_after_filter.jpeg'
+    ),width = 800,height = 800)
+    gplots::heatmap.2(
+      results_after_filtering,
+      trace = "none",
+      dendrogram = 'none',
+      Colv = F,
+      Rowv = F,
+      breaks = seq(0, 1, length.out = 101),
+      col = color(100),
+      density.info =  'density',
+      keysize = 1,
+      key.title = 'Simple matching coefficient',
+      RowSideColors = color_basenames[as.numeric(basenames_after_filtering$Group)],
+      ColSideColors = color_basenames[as.numeric(basenames_after_filtering$Group)],
+      labRow = FALSE,
+      labCol = FALSE
+    )
+    dev.off()
   }
 
-  return(list = c(
-    Before_filtering = list(Plot1),
-    After_filter = list(Plot2),
-    FilteredData = list(scCN)
-  ))
+
+  #filter out samples that don't correlate and save
+  scCN = scCN %>%
+    dplyr::filter(index %in% Index) %>%
+    tidyr::separate(index, c('group', 'index'), sep = ' _ ')
+
+  rep_percentage = scCN %>%
+    dplyr::group_by(Cell, basename, group, index) %>%
+    dplyr::summarise(Rep_percentage = mean(Rep))
+
+  #new index
+  new_index_list = rep_percentage %>%
+    dplyr::ungroup() %>%
+    dplyr::arrange(Rep_percentage) %>%
+    dplyr::group_by(group) %>%
+    dplyr::mutate(newIndex = 1:dplyr::n()) %>%
+    dplyr::arrange(group, newIndex) %>%
+    dplyr::select(oldIndex = index, newIndex, Cell, basename, group)
+
+  scCN = scCN %>%
+    dplyr::ungroup() %>%
+    dplyr::inner_join(new_index_list,
+                      by = c('Cell', 'index' = 'oldIndex', 'basename', 'group')) %>%
+    dplyr::select(
+      chr,
+      start,
+      end,
+      CN,
+      background,
+      CN_bg,
+      th,
+      Rep,
+      PercentageReplication,
+      Cell,
+      basename,
+      group,
+      newIndex
+    )
+  if (is.null(save_plot_basename)) {
+    return(list = c(
+      Before_filtering = list(Plot1),
+      After_filter = list(Plot2),
+      FilteredData = list(scCN)
+    ))
+  } else{
+    return(scCN)
+  }
 }
 
 
@@ -757,7 +789,7 @@ pseudoBulkRT <- function(S_scCN) {
   `%do%` = foreach::`%do%`
   `%>%` = tidyr::`%>%`
 
-  #calculate replication eprcentage
+  #calculate replication percentage
   rep_percentage = S_scCN %>%
     dplyr::group_by(Cell, basename, group, newIndex) %>%
     dplyr::summarise(Rep_percentage = mean(Rep))
@@ -839,12 +871,13 @@ pseudoBulkRT <- function(S_scCN) {
     dplyr::mutate(RT = (RT - min(RT)) / (max(RT) - min(RT)),
                   basename = group) %>%
     dplyr::select(chr, start, end, group, basename, RT) %>%
-    dplyr::ungroup()
+    dplyr::ungroup()%>%
+    dplyr::arrange(basename)
 
   return(scRT)
 }
 
-#'  prepares varibility file
+#'  prepares variability file
 #'
 #' @return tibble
 #'
@@ -852,7 +885,7 @@ pseudoBulkRT <- function(S_scCN) {
 #' @importFrom  tidyr %>%
 #'
 #' @param S_scCN, scCN dataframe from Replication_state function (after filtering,optional)
-#' @param scRT, pseudobulk-RT dataframe from pseudoBulkRT
+#' @param scRT, pseudo-bulk-RT dataframe from pseudoBulkRT
 #'
 #' @export
 #'
@@ -881,10 +914,10 @@ Variability <- function(S_scCN, scRT) {
 #' @importFrom  tidyr %>%
 #' @importFrom stringr str_remove_all
 #'
-#' @param scCN, Sphase cells scCN dataframe from extractSubpop
-#' @param scRT, pseudobulkRT dataframe from extractSubpop
+#' @param scCN, S-phase cells scCN dataframe from extractSubpop
+#' @param scRT, pseudo-bulk-RT dataframe from extractSubpop
 #' @param scVariability, single cell variability dataframe created by extractSubpop
-#' @param subpopulation, dataframe containing subpopulation info (Cell,basename,group,subpopulation)
+#' @param subpopulation, dataframe containing sub-population info (Cell,basename,group,subpopulation)
 #' @param RefRT, Reference RT of a group created by extractSubpop
 #'
 #' @export
@@ -902,7 +935,7 @@ rejoinSubpop = function(scCN,
   subpopulation = subpopulation %>%
     dplyr::mutate(group = paste(group, subpopulation, sep = '_'))
 
-  #select groupd that is changing
+  #select group that is changing
   scCN = scCN %>%
     dplyr::left_join(subpopulation, by = c("Cell", "basename", "group"))
 
@@ -946,7 +979,8 @@ rejoinSubpop = function(scCN,
   }
   #put back old group
   changing = changing  %>%
-    dplyr::mutate(group = stringr::str_remove_all(string = group, pattern = paste0('_', subpopulation))) %>%
+    dplyr::mutate(group = stringr::str_remove_all(string = group,
+                                                  pattern = paste0('_', subpopulation))) %>%
     dplyr::select(-subpopulation)
   #changing index
   Index = changing %>%
@@ -955,7 +989,7 @@ rejoinSubpop = function(scCN,
     dplyr::arrange(PercentageReplication) %>%
     dplyr::group_by(group) %>%
     dplyr::mutate(Ind = 1:dplyr::n())
-  #assing new index
+  #assign new index
   changing = changing %>%
     dplyr::inner_join(Index,
                       by = c("PercentageReplication", "Cell", "basename", "group")) %>%
@@ -1001,17 +1035,17 @@ rejoinSubpop = function(scCN,
 
 }
 
-#'  separates S phase cells into subgroups and calculates relative pseudobulkRT
+#'  separates S phase cells into sub-groups and calculates relative pseudo-bulk RT
 #'
 #' @return list
 #'
 #' @importFrom  dplyr n filter select group_split inner_join arrange group_by mutate ungroup
 #' @importFrom  tidyr %>%
 #'
-#' @param scCN, Sphase cells scCN dataframe from Rebin function (after filtering,optional)
-#' @param scRT, pseudobulkRT dataframe
+#' @param scCN, S-phase cells scCN dataframe from Rebin function (after filtering,optional)
+#' @param scRT, pseudo-bulk-RT dataframe
 #' @param scVariability, single cell variability dataframe the Variability function
-#' @param subpopulation, dataframe containing subpopulation info (Cell,basename,group,subpopulation)
+#' @param subpopulation, dataframe containing sub-population info (Cell,basename,group,subpopulation)
 #' @param RefRT, Reference RT dataframe from RebinRT
 #'
 #' @export
@@ -1025,7 +1059,7 @@ extractSubpop = function(scCN,
   #load required operators
   `%>%` = tidyr::`%>%`
 
-  #select groupd that is changing
+  #select groups that are changing
   changing = scCN %>%
     dplyr::filter(
       group %in% unique(subpopulation$group) &
@@ -1053,7 +1087,7 @@ extractSubpop = function(scCN,
     dplyr::arrange(PercentageReplication) %>%
     dplyr::group_by(group) %>%
     dplyr::mutate(Ind = 1:dplyr::n())
-  #assing new index
+  #assign new index
   changing = changing %>%
     dplyr::inner_join(Index,
                       by = c("PercentageReplication", "Cell", "basename", "group")) %>%

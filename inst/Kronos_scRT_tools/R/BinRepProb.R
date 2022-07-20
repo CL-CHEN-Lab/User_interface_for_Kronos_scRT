@@ -48,6 +48,11 @@ BinRepProb_server = function(id, variabilityBR, out, colors, size, save,file_nam
                               height = plot_size$height,
                               units = plot_size$unit
                             )
+
+                            VarBR %>%
+                              readr::write_tsv(paste0(file.path(Out,
+                                                                basename), '_BinRepProb.tsv'))
+
                           }
                         })
                       })

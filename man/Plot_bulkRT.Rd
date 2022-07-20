@@ -17,9 +17,9 @@ Plot_bulkRT(
 
 \item{Coordinates, }{named list containing chr,start and end position}
 
-\item{plotting_groups, }{optional: if provided samples can be plot together for comparison. It is a named list of arrays where the name is a sample basename and the array contains the group(s) in which the sample has to be plot.}
+\item{plotting_groups, }{optional: if provided samples can be plot together for comparison. It is a named list of arrays where the name is a sample basename if unique, otherwise basename - group, and the array contains the group(s) in which the sample has to be plot.}
 
-\item{sample_colors, }{a vector, named or not, for the samples}
+\item{sample_colors, }{a vector, named or not, for each sample. If multiple samples have the same name use "basename - group" otherwise only basename}
 
 \item{highlight_regions, }{optional: a list of arrays. each array contains start and end position of the region to highlight and optionally the color to use in third position}
 }

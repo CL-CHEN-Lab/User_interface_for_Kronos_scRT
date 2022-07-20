@@ -4,7 +4,7 @@
 #'
 #' @importFrom stringr str_locate_all
 #' @importFrom dplyr select mutate group_by n all_of summarise
-#' @importFrom tidyr spread drop_na %>% gather
+#' @importFrom tidyr spread drop_na %>% gather unite
 #' @importFrom foreach foreach %:% %do%
 #'
 #' @param ..., bulk/pseudo-bulk RTs dataframes (chr,start,end,RT,group)
@@ -31,10 +31,16 @@ RT_clustering=function(...,deltaRT_th=0.1,CrossingRT=T,n_clusters=NULL,colors=NU
   data=list(...)
   data <- do.call('rbind',data)
 
-  data = data %>%
-    dplyr::select(chr, start, end, RT, group) %>%
-    tidyr::spread(group, RT) %>%
-    tidyr::drop_na()
+  data = tryCatch(
+  data %>%
+    dplyr::select(chr, start, end, RT, basename) %>%
+    tidyr::spread(basename, RT) %>%
+    tidyr::drop_na(),
+  error= function(e) data %>%
+    tidyr::unite(name,basename,group,sep = ' - ')%>%
+    dplyr::select(chr, start, end, RT, name) %>%
+    tidyr::spread(name, RT) %>%
+    tidyr::drop_na())
 
   Groups = names(data)[!names(data) %in% c('chr', 'start', 'end')]
 
@@ -77,12 +83,12 @@ data=data%>%
   dplyr::mutate(clusters=factor(clusters, levels =paste('Cluster', 1:n_clusters) ))%>%
   dplyr::group_by(clusters)%>%
   dplyr::mutate(n=1:dplyr::n())%>%
-  tidyr::gather(group,RT,dplyr::all_of(Groups))
+  tidyr::gather(name,RT,dplyr::all_of(Groups))
 
 p=data%>%
-  ggplot2::ggplot(ggplot2::aes(x=group,y=n,hight=1,width=1,fill=RT))+
+  ggplot2::ggplot(ggplot2::aes(x=name,y=n,hight=1,width=1,fill=RT))+
   ggplot2::geom_raster()+
-  ggplot2::facet_grid(clusters ~ group,scales = 'free',space = 'free')+
+  ggplot2::facet_grid(clusters ~ name,scales = 'free',space = 'free')+
   ggplot2::scale_fill_gradient2(low = colors[1],midpoint = 0.5,high = colors[3] ,mid = colors[2])+
   ggplot2::theme_bw()+
   ggplot2::theme(axis.text = ggplot2::element_blank(),
