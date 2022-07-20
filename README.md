@@ -10,7 +10,7 @@ and then Kronos.scRT
 
     devtools::install_github("CL-CHEN-Lab/User_interface_for_Kronos_scRT", type = "source")
 
-This package contains 3 shiny apps:
+This package contains 4 shiny apps:
 
 - Kronos.scRT::Pre_processing()
  <p align="center">
