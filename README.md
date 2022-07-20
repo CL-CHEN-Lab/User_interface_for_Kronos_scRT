@@ -1,6 +1,22 @@
 # Kronos.scRT
 
-Based on Kronosc_scRT <a href="https://www.nature.com/articles/s41467-022-30043-x" title="(Gnan et al. 2022)">(Gnan et al. 2022) </a>, Kronos.scRT is an R package containing 3 shiny apps that will lead the user through the single-cell analysis of replication timing data. 
+Based on Kronosc_scRT <a href="https://www.nature.com/articles/s41467-022-30043-x" title="(Gnan et al. 2022)">(Gnan et al. 2022) </a>, Kronos.scRT is an R package containing 4 shiny apps that will lead the user through the single-cell analysis of replication timing data. 
+
+#### Table of content
+  * [Installation and preparation](#Installation-and-preparation)
+  * [Shiny Apps](#Shiny-Apps)
+  * [ Tutorial 1](#Tutorial-1---R-package)
+    * [1.1 R-package](#1.1-R-package)
+    * [1.2 Shell](#1.2-Shell)
+  * [Tutorial 2](#Tutorial-2)
+    * [2.1 R-package](#2.1-R-package)
+    * [2.2 Shell](#2.2-Shell)
+  * [Kronos scRT pipeline from shell](#Kronos-scRT-pipeline-from-shell)
+  * [Citation](#Citation)
+  * [Authors](#Authors)
+
+
+#### Installation and preparation
 
 To install the package, first install devtools 
 
@@ -10,6 +26,13 @@ and then Kronos.scRT
 
     devtools::install_github("CL-CHEN-Lab/User_interface_for_Kronos_scRT", type = "source")
 
+it is as well possible to use Kronos scRT from command line. To do so, it is possible to run the command
+
+    Kronos.scRT::shell_interface()
+
+that will return a line to add to the user's shell profile file to create the alias Kronos.
+
+#### Shiny Apps
 This package contains 4 shiny apps:
 
 - Kronos.scRT::Pre_processing()
@@ -43,6 +66,7 @@ This package contains 4 shiny apps:
 #### Tutorial 1
 
 You can download data published in <a href="https://doi.org/10.1038/s41588-019-0474-z" title="Miura et al. 2019">Miura et al. 2019</a> from SRA using SRP130912 identifier. A selection of G1- and Mid-S- phase cells are available <a href="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/data/SRP130912_G1_MidS_cells_to_download.txt">here</a>.
+#### 1.1 R-package
 
 The first step consists in trimming our single-cell data and mapping them against a reference genome. To do so, we use the function FastqToBam.
 
@@ -61,7 +85,7 @@ Once data have been mapped we bin our reference genome and calculate mappability
       cores = 6
     )
     
-The next step consists in calling the CN. In this specific case we are choosing to block the mean ploidy of thse cells around 2, but a range of allowed ploidy can be provided.
+The next step consists in calling the CN. In this specific case we are choosing to block the mean ploidy of these cells around 2, but a range of allowed ploidy can be provided.
 
     Chromsize = readr::read_tsv(url('http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/mm10.chrom.sizes'), col_names = c('chr', 'size'))
 
@@ -160,10 +184,11 @@ we can now explore the data using various investigation plots such as:
 
 Correlation plots
     
-    Kronos.scRT::KCorr_plot(df = rbind(
+    Kronos.scRT::KCorr_plot(
       SingleCell$pseudobulk,
-      Reference
-    ), method = 'spearman')
+      Reference,
+      method = 'spearman')
+      
  <p align="center">    
 <img src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/Corr.png" width="400">
 </p>
@@ -176,6 +201,7 @@ scRT genomic regions plots
       Coordinates = list(chr = 'chr1', start = 2800000, end = 12800000) ,
       rasterized_heatmap = T
     )
+    
  <p align="center">    
 <img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/scRTplot.png">
 </p>
@@ -193,14 +219,103 @@ Explore Variability based on RT or regions of interest
      Twidth = Kronos.scRT::Twidth(Fit_Data)
      
      Kronos.scRT::Twidth_barplot(Variability = Var,Twidth = Twidth)
+     
  <p align="center">
 <img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/TW.png" width="400">
 </p>
+
+#### 1.2 Shell
+
+The same analysis can be run from command line as follows.
+
+To trim and map our data we used the command Kronos fastqtoBAM
+
+    Kronos fastqtoBAM -O /dir_to_fastq/SRR6491868_1.fastq,/dir_to_fastq/SRR6491869_1.fastq,..,/dir_to_fastq/SRR6491908_1.fastq \
+    -i /dir_to_bowtie2_index/mm10 \
+    -o fastqtoBAM_output_directory \
+    -c 6
+    
+inside the output folder we will find the following sub-folders:
+  - FastqToBamMetrics, containing some quality control metrics
+  - trimmed, containing our trimmed data
+  - BAM, containing our mapped data
+   
+To create the bins needed for the copy number calling we use Kronos binning 
+
+    Kronos binning -R /dir_to_reference_genome/mm10.fa \
+    -o binning_output_directory \
+    -i /directory_to_bowtie2_index/mm10 \
+    -d /fastqtoBAM_output_directory/BAM/ \
+    -c 6
+    
+To calculate the CNV tracks and the PerCell file we use Kronos CNV
+
+    Kronos CNV -D /fastqtoBAM_output_directory/BAM/ \
+    -B binning_output_directory/bins \
+    -o CNV_output_directory \
+    -C Chromosome_size_file \
+    -c 6 -e MsESC -g MsESC -p 2 
+    
+The outputs of this command are two files: MsESC_scCNV.tsv and MsESC_PerCell.csv
+
+As before we can impose its cycling stage to each cell using the metadata here deposeted.
+
+    Kronos WhoIsWho -F CNV_output_directory/MsESC_PerCell.csv \
+    -W Metadata.tsv \
+    -o WhoIsWho_output_directory
+
+that will create a phased_MsESC_PerCell.csv file that will be used as an input of Kronos diagnostic. Since in this case there is no interactive session, the factors to correct the S-phase progression have to be provided using the -f and -s options.
+
+    Kronos diagnostic -f WhoIsWho_output_directory/phased_MsESC_PerCell.csv \
+    -o diagnostic_output_directory -f 0.889 -s 1
+
+We are now ready to calculate scRT tracks, pseudo-bulk RT and variability files.
+
+    Kronos RT -F WhoIsWho_output_directory/phased_MsESC_PerCell.csv \
+    -T CNV_output_directory/MsESC_scCNV.tsv \
+    -C Chromosome_size_file \
+    -B 200Kb \
+    -o RT_output_directory \
+    -f Mouse_data \
+    -S diagnostic_output_directory/settings.txt
+
+And optionally resize a reference RT for comparison
+
+    Kronos RefRT -R ReferenceRT.tsv \
+    -N Referece # the name that will be used in the plots
+    -G MsESC # the same group name of your data
+    -B RT_output_directory/Mouse_data_bins.rds
+    -o RefRT_output_directory
+    -f Mouse
+    
+We have now everything to obtain our plots 
+
+- Correlation plots
+    
+      Kronos Corr -F RT_output_directory/MsESC_calculated_replication_timing_200Kb.tsv,RefRT_output_directory/Mouse_reference_replication_timing_200kb.tsv \
+      -f Ms_bulk_vs_pseudobulk
+      -o Corr_output_directory
+
+- scPlots 
+
+      Kronos scPlots -R RT_output_directory/MsESC_calculated_replication_timing_200Kb.tsv \
+      -C RT_output_directory/MsESC_single_cells_CNV_200Kb.tsv \
+      -E RefRT_output_directory/Mousere_ference_replication_timing_200kb.tsv \
+      -r chr1:2800000-12800000 \
+      -o scPlot_output_directory
+    
+- TW plots
+  
+      Kronos compare TW -F /Users/sgnan/Desktop/TestRT/MsESC_variability.tsv \
+      -o compare_TW_output_directory
+
 #### Tutorial 2
 
 To give a more comprhesive idea of Kronos scRT potential a bigger dataset form <a href="https://www.nature.com/articles/s41467-022-30043-x" title="(Gnan et al. 2022)">(Gnan et al. 2022) </a> is provided with this package.
 
     SingleCell=Kronos.scRT::MCF7_subpop1
+
+#### 2.1 R-package
 
 Using the diagnostic function we can dived S-phase cells from G1/G2 cells selecting a buffer reagin between the low variability G1/G2-phase cells and the two arms made of high variability S-phase cells.
 
@@ -287,10 +402,11 @@ Calculate pseudobulk and load reference RT
 
 Calculate correlation between Bulk and Pseudobulk
     
-    Kronos.scRT::KCorr_plot(df = rbind(
+    Kronos.scRT::KCorr_plot(
       SingleCell$pseudobulk,
-      Reference
-    ), method = 'spearman')
+      Reference,
+      method = 'spearman')
+      
  <p align="center">   
 <img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/MCF7_Corr.png" alt="Correlation Matrix" width="400">
 </p>
@@ -302,10 +418,11 @@ and explore genomic regions using the following command
       S_scCN = SingleCell$SPhase,
       Coordinates = list(chr = 'chr1', start = 40000000, end = 100000000) ,
       rasterized_heatmap = T)
+      
  <p align="center">
 <img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/MCF7_scPlot.png" alt="ScPlots">
 </p>
-This dataset allows to explore variability at a much higher resolution compared to the one before we can therfore up to 5 RT categoris to calculate the TW.
+This dataset allows to explore variability at a much higher resolution compared to the one before we can therefore up to 5 RT categories to calculate the TW.
 
     Var=Kronos.scRT::Variability(S_scCN=SingleCell$SPhase,scRT=SingleCell$pseudobulk)
     Var=Kronos.scRT::TW_RTAnnotation(Variability=Var,RT_Groups=5)
@@ -316,6 +433,8 @@ This dataset allows to explore variability at a much higher resolution compared 
     Twidth = Kronos.scRT::Twidth(Fit_Data)
     
     Kronos.scRT::Twidth_extended_plot(Variability = Var,Fitted_data = Fit_Data,Twidth = Twidth)
+
+    
  <p align="center">
 <img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/TW_ext.png" alt="Correlation Matrix">
 </p>
@@ -325,8 +444,19 @@ This dataset allows to explore variability at a much higher resolution compared 
  <p align="center">
 <img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/TW_MCF7.png" >
 </p>
+We can as well test whether the differences between RT categories are statistically significant and plot the pvalues together with the barplots providing the output of Twidth_pval as an input to Twidth_barplot. N.B. this operation is highly time consuming. 
 
-Another way to visualise RT variability is the bin probability of being replicated in function of its average replication timing in different portions of the S phase.
+    pval=Kronos.scRT::Twidth_pval(
+    variability = Var,
+    twidth = Twidth,
+    alternative = 'two.sided' ,
+    nIterations = 10^4,
+    ncores = 6, 
+    adjust.methods = 'none')
+    
+    Kronos.scRT::Twidth_barplot(Variability = Var,Twidth = Twidth, pval = pval)
+
+Another way to visualize RT variability is the bin probability of being replicated in function of its average replication timing in different portions of the S phase.
 
     BinProbS=Kronos.scRT::Prepare_S_phase_cells_forBinRepProb(S = SingleCell$SPhase,RT = SingleCell$pseudobulk)
     BinProbG=Kronos.scRT::Prepare_G1G2_phase_cells_forBinRepProb(G1.G2 = SingleCell$G1G2,RT = SingleCell$pseudobulk)
@@ -336,7 +466,81 @@ Another way to visualise RT variability is the bin probability of being replicat
 <p align="center">
 <img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/BinProb.png">
 </p>
-### Authors
+
+#### 2.2 Shell
+
+To perform this analysis using your command line you need to save the MFC7 data into a folder as follow: 
+
+    readr::write_tsv(Kronos.scRT::MCF7_subpop1$CNV,file = 'Input_dir/MCF7_subpop1_CNV.tsv')
+    readr::write_csv(Kronos.scRT::MCF7_subpop1$PerCell,file = 'Input_dir/MCF7_subpop1_PerCell.csv')
+
+Using Kronos diagnostic we can identify the S and G1/G2 populatio as well as reconstruct the S-phase progression.
+
+    Kronos diagnostic -f Input_dir/MCF7_subpop1_PerCell.csv \
+    -o diagnostic_output_directory 
+    -S 0.9 -G 0.85 \
+    -m 117 -C
+
+We are now ready to calculate scRT tracks, pseudo-bulk RT and variability files.
+
+    Kronos RT -F Input_dir/MCF7_subpop1_PerCell.csv \
+    -T Input_dir/MCF7_subpop1_CNV.tsv \
+    -C Chromosome_size_file \
+    -B 200Kb \
+    -o RT_output_directory \
+    -f MCF7 \
+    -S diagnostic_output_directory/settings.txt \
+    --extract_G1_G2_cells
+
+And optionally resize a reference RT for comparison
+
+    Kronos RefRT -R ReferenceRT.tsv \
+    -N Referece # the name that will be used in the plots
+    -G 'MCF7 subpopulation1' # the same group name of your data
+    -B RT_output_directory/MCF7_data_bins.rds
+    -o RefRT_output_directory
+    -f MCF7
+    
+We have now evetrything to obtain our plots 
+
+- Correlation plots
+    
+      Kronos Corr -F RT_output_directory/MCF7_calculated_replication_timing_200Kb.tsv,RefRT_output_directory/MCF7_reference_replication_timing_200kb.tsv \
+      -f MCF7_bulk_vs_pseudobulk
+      -o Corr_output_directory
+
+- scPlots 
+
+      Kronos scPlots -R RT_output_directory/MCF7_calculated_replication_timing_200Kb.tsv \
+      -C RT_output_directory/MCF7_single_cells_CNV_200Kb.tsv \
+      -E RefRT_output_directory/MCF7_reference_replication_timing_200kb.tsv \
+      -r chr1:40000000-100000000 \
+      -o scPlot_output_directory
+    
+- TW plots
+
+      Kronos compare TW -F /Users/sgnan/Desktop/TestRT/MCF7_variability.tsv \
+      -o compare_TW_output_directory
+    
+using the option -p it is possible as well to calculate a pvalue
+
+- BinRepProb plots
+
+      Kronos BinRepProb -S RT_output_directory/MCF7_single_cells_CNV_200Kb.tsv \
+      - G RT_output_directory/MCF7_G1_G2_single_cells_CNV_200Kb.tsv \
+      -o BinRepProb_output_directory -f MCF7Sub1
+    
+#### Kronos scRT pipeline from shell
+
+<p align="center">
+<img  src="https://github.com/CL-CHEN-Lab/User_interface_for_Kronos_scRT/blob/main/img/schema.png">
+</p>
+
+#### Citation
+If you use Kronos scRT, please cite the following paper:
+
+Gnan, S., Josephides, J.M., Wu, X. et al. Kronos scRT: a uniform framework for single-cell replication timing analysis. Nat Commun 13, 2329 (2022). https://doi.org/10.1038/s41467-022-30043-x
+#### Authors
 
 Please contact the authors for any further questions:
 
