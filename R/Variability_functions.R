@@ -506,7 +506,7 @@ TW_RTAnnotation = function(Variability, RT_Groups = 2) {
 #' @importFrom snow makeCluster stopCluster
 #' @export
 #'
-#' @param Variability, dataframe created by Kronos
+#' @param variability, dataframe created by Kronos
 #' @param twidth,  dataframe created by Twidth
 #' @param pairs_to_test, a dataframe containing the columns Category1, Category2 to test
 #' @param adjust.methods, correction method. Can be abbreviated. by default it is set as none
@@ -661,12 +661,12 @@ Twidth_pval = function(variability,
       )
     }
 
-  if(adjust.methods=='none'){
+  if(adjust.methods[1]=='none'){
       return(pval)
   }else{
 
     pval%>%
-      dplyr::mutate(adj.pval=p.adjust(pval,method = adjust.methods))%>%
+      dplyr::mutate(adj.pval=p.adjust(pval,method = adjust.methods[1]))%>%
       dplyr::select(group,category1,category2,pval,adj.pval,iterations)%>%
       return()
     }

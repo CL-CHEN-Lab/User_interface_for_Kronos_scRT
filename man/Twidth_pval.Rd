@@ -16,6 +16,8 @@ Twidth_pval(
 )
 }
 \arguments{
+\item{variability, }{dataframe created by Kronos}
+
 \item{twidth, }{dataframe created by Twidth}
 
 \item{pairs_to_test, }{a dataframe containing the columns Category1, Category2 to test}
@@ -27,8 +29,6 @@ Twidth_pval(
 \item{nIterations, }{number of iterations}
 
 \item{ncores, }{number of cores for parallelization}
-
-\item{Variability, }{dataframe created by Kronos}
 }
 \description{
 Hypothesis test between different RT categories inside a sample
