@@ -24,6 +24,7 @@ imports:
   MASS
   R.utils
   Rbowtie2
+  RColorBrewer
   Rsamtools
   Rtsne
   S4Vectors
@@ -38,11 +39,14 @@ imports:
   ggforce
   ggplot2
   ggrastr
+  gplots
   grDevices
   heatmaply
   matrixStats
+  optparse
   parallel
   readr
+  scales
   shiny
   shinyFiles
   shinyWidgets
@@ -53,6 +57,7 @@ imports:
   sp
   stringr
   tibble
+  tidyr
   tools
   umap
   utils
