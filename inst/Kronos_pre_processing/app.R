@@ -30,6 +30,8 @@ ui <- shinydashboard::dashboardPage(
                                tabName = "Binning"),
       shinydashboard::menuItem(text = "Copy Number Calling",
                                tabName = "CN"),
+      shinydashboard::menuItem(text = "10XGenomics data conversion",
+                               tabName = "10X"),
       shinydashboard::menuItem(text = "Exit",
                                tabName = "Exit")
     )
@@ -657,6 +659,86 @@ ui <- shinydashboard::dashboardPage(
           ))
         )
 
+      },
+      #####10X
+      {
+        shinydashboard::tabItem(
+          tabName = "10X",
+          shiny::fluidRow(
+            shiny::column(
+              width = 3,
+              shinyFiles::shinyFilesButton(
+                id = 'PerCell_10X',
+                label = div('PerCell',
+                            bsplus::shiny_iconlink() %>%
+                              bsplus::bs_embed_popover(title = '10XGenomics per_cell_summary_metrics.csv' , placement = 'right')),
+                title = 'PerCell file',
+                style = 'width:100%;',
+                multiple = F
+              )
+            ),
+            shiny::column(width = 9,
+                          shiny::htmlOutput('PerCell_10X'))
+          ),
+          shiny::fluidRow(
+            shiny::column(
+              width = 3,
+              shinyFiles::shinyFilesButton(
+                id = 'CNV_10X',
+                label = shiny::div(
+                  'CNV',
+                  bsplus::shiny_iconlink() %>%
+                    bsplus::bs_embed_popover(title = '10XGenomics node_cnv_calls.bed' , placement = 'right')),
+                title = 'CNV_10X',
+                style = 'width:100%;',
+                multiple = F
+              )
+            ),
+            shiny::column(width = 9,
+                          shiny::htmlOutput('CNV_10X'))
+          ),
+          shiny::fluidRow(
+            shiny::column(
+              width = 3,
+              shiny::textInput(
+                inputId = 'Basename_10X',
+                label = 'Basename',
+                value = 'Exp',
+                width = '100%'
+              )
+            ),
+            shiny::column(
+              width = 3,
+              shiny::textInput(
+                inputId = 'Group_10X',
+                label = 'Group',
+                value = 'Exp',
+                width = '100%'
+              )
+            )),
+            shiny::fluidRow(
+              shiny::column(
+                width = 3,
+                shinyFiles::shinyDirButton(
+                  id = 'Output_10X',
+                  label = 'Results folder',
+                  title = 'Results folder',
+                  style = 'width:100%;'
+                )
+              ),
+              shiny::column(width = 9,
+                            shiny::htmlOutput('Output_10X'))
+            ),
+            shiny::fluidRow(
+              shiny::column(
+                width = 3,
+                shinyjs::disabled(
+                shiny::actionButton(inputId = 'Run_10X',label = 'Run',width = '100%'))
+              )
+            )
+            )
+
+
       })
     )
   )
@@ -682,6 +764,7 @@ ui <- shinydashboard::dashboardPage(
       roots = roots,
       defaultRoot = 'Home'
     )
+
     shinyFiles::shinyDirChoose(
       input = input,
       id = 'out',
@@ -706,6 +789,27 @@ ui <- shinydashboard::dashboardPage(
     shinyFiles::shinyFileChoose(
       input = input,
       id = 'fasta',
+      session = session,
+      roots = roots,
+      defaultRoot = 'Home'
+    )
+    shinyFiles::shinyDirChoose(
+      input = input,
+      id = 'Output_10X',
+      session = session,
+      roots = roots,
+      defaultRoot = 'Home'
+    )
+    shinyFiles::shinyFileChoose(
+      input = input,
+      id = 'CNV_10X',
+      session = session,
+      roots = roots,
+      defaultRoot = 'Home'
+    )
+    shinyFiles::shinyFileChoose(
+      input = input,
+      id = 'PerCell_10X',
       session = session,
       roots = roots,
       defaultRoot = 'Home'
@@ -740,6 +844,149 @@ ui <- shinydashboard::dashboardPage(
       frag_size = 200,
       read_type = 'PE'
     )
+
+    variables_10X = reactiveValues(
+      Output_10X=NULL,
+      PerCell_10X=NULL,
+      CNV_10X=NULL,
+    )
+
+    ###10X to Kronos
+
+    {
+      #set output folder
+      shiny::observeEvent(input$Output_10X, {
+        if (!is.numeric(input$Output_10X)) {
+          variables_10X$Output_10X = shinyFiles::parseDirPath(roots = roots, selection = input$Output_10X)
+        } else{
+          variables_10X$Output_10X = NULL
+        }
+        output$Output_10X = shiny::renderText(variables_10X$Output_10X)
+
+      })
+
+      #set PerCell_10X
+      shiny::observeEvent(input$PerCell_10X, {
+        if (!is.numeric(input$PerCell_10X)) {
+          variables_10X$PerCell_10X = shinyFiles::parseFilePaths(roots = roots, selection = input$PerCell_10X)
+          variables_10X$PerCell_10X = variables_10X$PerCell_10X$datapath
+          variables_10X$PerCell_10X = Kronos.scRT::right_format(
+            file_path = variables_10X$PerCell_10X,
+            delim = ',',
+            columns_to_check = c(
+              "barcode",
+              "cell_id",
+              "total_num_reads",
+              "num_unmapped_reads" ,
+              "num_lowmapq_reads",
+              "num_duplicate_reads" ,
+              "num_mapped_dedup_reads",
+              "frac_mapped_duplicates",
+              "effective_depth_of_coverage",
+              "effective_reads_per_1Mbp"  ,
+              "raw_mapd",
+              "normalized_mapd" ,
+              "raw_dimapd",
+              "normalized_dimapd" ,
+              "mean_ploidy",
+              "ploidy_confidence" ,
+              "is_high_dimapd",
+              "is_noisy"
+            ),
+            wrong_message = paste(
+              '<b><p  style="color:#FF0000";>',
+              variables_10X$PerCell_10X,
+              'does not have the right format!</p></b>'
+            ),
+            rigth_message = variables_10X$PerCell_10X
+          )
+        } else{
+          variables_10X$PerCell_10X = NULL
+        }
+        output$PerCell_10X = shiny::renderText(variables_10X$PerCell_10X)
+
+      })
+
+      #set CN_10X
+      shiny::observeEvent(input$CNV_10X, {
+        if (!is.numeric(input$CNV_10X)) {
+          variables_10X$CNV_10X = shinyFiles::parseFilePaths(roots = roots, selection = input$CNV_10X)
+          variables_10X$CNV_10X = variables_10X$CNV_10X$datapath
+          variables_10X$CNV_10X = Kronos.scRT::right_format(
+            file_path = variables_10X$CNV_10X,
+            delim = '\t',skip = 2,
+            columns_to_check = c(
+              "#chrom",
+              "start",
+              "end",
+              "id",
+              "copy_number",
+              "event_confidence"
+            ),
+            wrong_message = paste(
+              '<b><p  style="color:#FF0000";>',
+              variables_10X$CNV_10X,
+              'does not have the right format!</p></b>'
+            ),
+            rigth_message = variables_10X$CNV_10X
+          )
+        } else{
+          variables_10X$CNV_10X = NULL
+        }
+        output$CNV_10X = shiny::renderText(variables_10X$CNV_10X)
+
+      })
+
+
+      #basename and group
+      shiny::observeEvent(input$Group_10X, {
+        shiny::updateTextInput(inputId = 'Group_10X',value = stringr::str_replace(string = input$Group_10X,pattern = ' ',replacement = '_'))
+          })
+
+      shiny::observeEvent(input$Basename_10X, {
+        shiny::updateTextInput(inputId = 'Basename_10X',value = stringr::str_replace(string = input$Basename_10X,pattern = ' ',replacement = '_'))
+      })
+
+      #allow to run if files are selected
+
+      shiny::observeEvent(c(
+        variables_10X$Output_10X,
+        variables_10X$PerCell_10X,
+        variables_10X$CNV_10X
+      ),
+      {
+        if(!is.null(variables_10X$Output_10X) &
+           !is.null(variables_10X$PerCell_10X)&
+           !is.null(variables_10X$CNV_10X)){
+          shinyjs::enable('Run_10X')
+        }else{
+          shinyjs::disable('Run_10X')
+        }
+      })
+
+      #run conversion
+
+      shiny::observeEvent(input$Run_10X,{
+
+        results=Kronos.scRT::TenXtoKronos(PerCell = variables_10X$PerCell_10X,CNV =variables_10X$CNV_10X,basename = input$Basename_10X, input$Group_10X)
+        results$PerCell%>%
+          readr::write_csv(paste0(file.path(variables_10X$Output_10X, 'Kronos_format_'), basename(variables_10X$PerCell_10X)))
+
+        results$CNV%>%
+          readr::write_tsv(paste0(file.path(variables_10X$Output_10X, 'Kronos_format_'), stringr::str_replace(string = basename(variables_10X$CNV_10X),pattern = '.bed',replacement = '.tsv')))
+
+        shiny::updateTextInput(inputId = 'Group_10X',value = 'Exp')
+        shiny::updateTextInput(inputId = 'Basename_10X',value = 'Exp')
+
+        variables_10X$PerCell_10X=NULL
+        variables_10X$CNV_10X=NULL
+        output$CNV_10X = shiny::renderText(variables_10X$CNV_10X)
+        output$PerCell_10X = shiny::renderText(variables_10X$PerCell_10X)
+
+      })
+
+
+    }
 
     ##fastqToBam
     {
@@ -1822,7 +2069,7 @@ ui <- shinydashboard::dashboardPage(
 
       #set output folder
       shiny::observeEvent(input$Output_CN, {
-        if (!is.numeric(input$Output_C)) {
+        if (!is.numeric(input$Output_CN)) {
           variables_cn$Output_CN = shinyFiles::parseDirPath(roots = roots, selection = input$Output_CN)
         } else{
           variables_cn$Output_CN = NULL
@@ -1831,7 +2078,7 @@ ui <- shinydashboard::dashboardPage(
 
       })
 
-      #set BinsFIle
+      #set BinsFile
       shiny::observeEvent(input$Bins_CN, {
         if (!is.numeric(input$Bins_CN)) {
           variables_cn$Bins_CN = shinyFiles::parseFilePaths(roots = roots, selection = input$Bins_CN)

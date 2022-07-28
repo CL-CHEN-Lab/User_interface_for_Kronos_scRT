@@ -63,7 +63,7 @@ option_list = list(
       type = "character",
       default = 'Exp',
       action = 'store',
-      help = "Group to which this experimetn belongs to. [default= %default]",
+      help = "Group to which this experiment belongs. [default= %default]",
       metavar = "character"
     ),
     optparse::make_option(

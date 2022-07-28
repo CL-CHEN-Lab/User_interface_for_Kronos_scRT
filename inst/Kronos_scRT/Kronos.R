@@ -18,6 +18,7 @@ dictionary=function(call){
                      call[1]=='RT' ~ list('Kronos_RT.R',2),
                      call[1]=='WhoIsWho' ~ list('Kronos_whoswho.R',2),
                      call[1]=='CNV' ~ list('Kronos_cnv.R',2),
+                     call[1]=='10XtoKronos' ~ list('10XtoKronos.R',2),
                      call[1]=='diagnostic' ~ list('Kronos_diagnostic.R',2),
                      call[1]=='fastqtoBAM' ~ list('Kronos_fastqtoBAM.R',2),
                      call[1]=='scPlots' ~ list('Kronos_scPlots.R',2),
@@ -47,6 +48,7 @@ if(is.na(called_module$module)){
 message("\nProgram: Kronos (Tools for the single cell analysis of the replication timing program)\n
 Usage: Kronos <command> [options]\n
 commands:\n
+\t 10XtoKronos \t\t Converts 10XGenomics output to Kronos scRT format
 \t fastqtoBAM \t\t Trims and maps reads
 \t binning\t\t Calculates mappability and gc content for bins to be used with Kronos CNV
 \t CNV\t\t\t Calculates copy number variation
